@@ -1,16 +1,13 @@
 from typing import Annotated
 
 from langchain_tavily import TavilySearch
-from langchain_core.tools import tool
+from langchain_core.messages import BaseMessage
 from typing_extensions import TypedDict
 from langchain.chat_models import init_chat_model
-
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode, tools_condition
-
-from langgraph.types import Command, interrupt
 
 MODEL= "openai:gpt-4o-mini"
 
@@ -21,27 +18,16 @@ class State(TypedDict):
 
 graph_builder = StateGraph(State)
 
-@tool
-def human_assistance(query: str) -> str:
-    """Request assistance from a human."""
-    human_response = interrupt({"query": query})
-    return human_response["data"]
-
 tool = TavilySearch(max_results=2)
-tools = [tool, human_assistance]
+tools = [tool]
 llm_with_tools = llm.bind_tools(tools)
 
 def chatbot(state: State):
-    message = llm_with_tools.invoke(state["messages"])
-    # Because we will be interrupting during tool execution,
-    # we disable parallel tool calling to avoid repeating any
-    # tool invocations when we resume.
-    assert len(message.tool_calls) <= 1
-    return {"messages": [message]}
+    return {"messages": [llm_with_tools.invoke(state["messages"])]}
 
 graph_builder.add_node("chatbot", chatbot)
 
-tool_node = ToolNode(tools=tools)
+tool_node = ToolNode(tools=[tool])
 graph_builder.add_node("tools", tool_node)
 
 graph_builder.add_conditional_edges(
@@ -52,22 +38,40 @@ graph_builder.add_edge("tools", "chatbot")
 graph_builder.add_edge(START, "chatbot")
 
 memory = MemorySaver()
-
 graph = graph_builder.compile(checkpointer=memory)
 
-# from IPython.display import Image, display
-
-# try:
-#     display(Image(graph.get_graph().draw_mermaid_png()))
-# except Exception:
-#     # This requires some extra dependencies and is optional
-#     pass
-
-user_input = "I need some expert guidance for building an AI agent. Could you request assistance for me?"
 config = {"configurable": {"thread_id": "1"}}
+events = graph.stream(
+    {
+        "messages": [
+            {
+                "role": "user",
+                "content": (
+                    "I'm learning LangGraph. "
+                    "Could you do some research on it for me?"
+                ),
+            },
+        ],
+    },
+    config,
+    stream_mode="values",
+)
+for event in events:
+    if "messages" in event:
+        event["messages"][-1].pretty_print()
 
 events = graph.stream(
-    {"messages": [{"role": "user", "content": user_input}]},
+    {
+        "messages": [
+            {
+                "role": "user",
+                "content": (
+                    "Ya that's helpful. Maybe I'll "
+                    "build an autonomous agent with it!"
+                ),
+            },
+        ],
+    },
     config,
     stream_mode="values",
 )
