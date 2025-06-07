@@ -139,7 +139,57 @@ def create_planner_node(model: ChatOpenAI):
                     user_query = msg.content
                     break
         
-        planning_prompt = f"""사용자의 질문을 분석하여 단계별 실행 계획을 수립해주세요.
+        # 기존 계획이 있는지 확인
+        existing_plan = state.get("plan")
+        
+        if existing_plan:
+            # 완료된 단계들 정보 수집
+            completed_steps = []
+            for step in existing_plan.steps:
+                if step.status == "completed":
+                    completed_steps.append(f"단계 {step.step_id}: {step.description} - 완료됨 (결과: {step.result})")
+            
+            completed_steps_text = "\n".join(completed_steps) if completed_steps else "아직 완료된 단계가 없습니다."
+            
+            planning_prompt = f"""기존 계획을 검토하고 업데이트해주세요.
+
+사용자 질문: {user_query}
+기존 목표: {existing_plan.goal}
+
+완료된 단계들:
+{completed_steps_text}
+
+현재 상황을 고려하여 남은 단계들을 재검토하고 필요시 계획을 수정해주세요.
+완료된 단계는 그대로 유지하고, 새로운 정보나 상황 변화에 따라 남은 단계들을 조정하세요.
+
+다음 도구들을 활용할 수 있습니다:
+- web_search: 웹에서 정보 검색
+- read_file: 파일 내용 읽기  
+- write_file: 파일에 내용 쓰기
+- list_directory: 디렉토리 파일 목록 조회
+
+업데이트된 계획을 다음 JSON 형식으로 제공해주세요:
+{{
+    "goal": "사용자 질문에 대한 목표 (기존 목표 유지 또는 수정)",
+    "steps": [
+        {{
+            "step_id": 1,
+            "description": "첫 번째 단계 설명",
+            "tools_needed": ["필요한_도구1", "필요한_도구2"],
+            "status": "completed"  // 완료된 단계의 경우
+        }},
+        {{
+            "step_id": 2, 
+            "description": "두 번째 단계 설명 (새로 추가되거나 수정된 단계)",
+            "tools_needed": ["필요한_도구3"],
+            "status": "pending"  // 아직 실행되지 않은 단계
+        }}
+    ]
+}}
+
+완료된 단계들은 step_id와 status를 유지하고, 새로운 단계들은 연속된 번호를 사용하세요."""
+        else:
+            planning_prompt = f"""사용자의 질문을 분석하여 단계별 실행 계획을 수립해주세요.
 
 사용자 질문: {user_query}
 
@@ -187,16 +237,40 @@ def create_planner_node(model: ChatOpenAI):
             
             plan_data = json.loads(json_str)
             
-            # Plan 객체 생성
-            steps = [PlanStep(**step) for step in plan_data["steps"]]
+            # Plan 객체 생성 - 기존 계획 업데이트 또는 새로 생성
+            steps = []
+            for step_data in plan_data["steps"]:
+                step = PlanStep(**step_data)
+                # 기존 결과가 있다면 유지
+                if existing_plan:
+                    for existing_step in existing_plan.steps:
+                        if existing_step.step_id == step.step_id and existing_step.status == "completed":
+                            step.result = existing_step.result
+                            step.status = existing_step.status
+                steps.append(step)
+            
             plan = Plan(
                 goal=plan_data["goal"],
                 steps=steps,
                 status="executing"
             )
             
+            # current_step 설정 - 다음 실행할 단계 찾기
+            plan.current_step = 0
+            for i, step in enumerate(plan.steps):
+                if step.status != "completed":
+                    plan.current_step = i
+                    break
+            else:
+                # 모든 단계가 완료된 경우
+                plan.current_step = len(plan.steps)
+                plan.status = "completed"
+            
             # 상태 업데이트
-            ai_message = AIMessage(content=f"계획을 수립했습니다:\n목표: {plan.goal}\n단계 수: {len(plan.steps)}")
+            if existing_plan:
+                ai_message = AIMessage(content=f"계획을 업데이트했습니다:\n목표: {plan.goal}\n총 단계 수: {len(plan.steps)}\n완료된 단계: {sum(1 for s in plan.steps if s.status == 'completed')}")
+            else:
+                ai_message = AIMessage(content=f"계획을 수립했습니다:\n목표: {plan.goal}\n단계 수: {len(plan.steps)}")
             
             return {
                 "messages": [ai_message],
@@ -208,7 +282,7 @@ def create_planner_node(model: ChatOpenAI):
             error_msg = f"계획 수립 중 오류 발생: {str(e)}"
             return {
                 "messages": [AIMessage(content=error_msg)],
-                "plan": None
+                "plan": existing_plan  # 오류 발생시 기존 계획 유지
             }
     
     return planner
@@ -217,7 +291,7 @@ def create_planner_node(model: ChatOpenAI):
 def create_executor_node(model: ChatOpenAI, tools: List):
     """계획 실행 노드를 생성합니다."""
     
-    def executor(state: AutoAgentState, config: RunnableConfig) -> dict:
+    async def executor(state: AutoAgentState, config: RunnableConfig) -> dict:
         """현재 단계를 실행합니다."""
         
         plan = state["plan"]
@@ -250,7 +324,7 @@ def create_executor_node(model: ChatOpenAI, tools: List):
             
             # 도구 실행을 위한 메시지 준비
             tool_state = {"messages": messages + [response]}
-            tool_result = tool_node.invoke(tool_state)
+            tool_result = await tool_node.ainvoke(tool_state)
             tool_messages = tool_result["messages"]
             
             # 도구 결과를 포함한 최종 응답 생성
@@ -358,17 +432,41 @@ def should_continue(state: AutoAgentState) -> str:
     if not plan:
         return "end"
     
+    # 현재 단계가 완료되었는지 확인
     if plan.current_step < len(plan.steps):
-        # 다음 단계로 진행
-        plan.current_step += 1
-        if plan.current_step < len(plan.steps):
+        current_step = plan.steps[plan.current_step]
+        
+        # 현재 단계가 완료되지 않았다면 실행
+        if current_step.status != "completed":
             return "execute"
+        
+        # 현재 단계가 완료되었다면 다음 단계로 이동
+        plan.current_step += 1
+        
+        # 아직 실행할 단계가 남아있다면 계획 재평가
+        if plan.current_step < len(plan.steps):
+            return "replan"  # 계획 재평가 후 실행
         else:
             # 모든 단계 완료
             plan.status = "completed"
             return "finalize"
     
     return "end"
+
+
+def should_replan(state: AutoAgentState) -> str:
+    """계획을 재평가할지 결정합니다."""
+    
+    plan = state["plan"]
+    if not plan:
+        return "end"
+    
+    # 완료된 단계가 있고 아직 실행할 단계가 남아있다면 재계획
+    completed_steps = sum(1 for step in plan.steps if step.status == "completed")
+    if completed_steps > 0 and plan.current_step < len(plan.steps):
+        return "replan"
+    
+    return "execute"
 
 
 def needs_summarization(state: AutoAgentState) -> str:
@@ -408,10 +506,10 @@ class AutoAgent:
                     "args": ["/Users/admin/Desktop/workspace/my_github/langgraph_backend/backend/mcp/math/math.py"],
                     "transport": "stdio",
                 },
-                "web_search": {
-                    "url": "http://localhost:8931/mcp",
-                    "transport": "streamable_http",
-                },
+                # "web_search": {
+                #     "url": "http://localhost:8931/mcp",
+                #     "transport": "streamable_http",
+                # },
                 "playwright": {
                     "url": "http://localhost:8080/mcp",
                     "transport": "streamable_http",
@@ -428,6 +526,7 @@ class AutoAgent:
                 return mcp_tools
             except Exception as e:
                 print(f"MCP 도구 가져오기 실패: {e}")
+                assert False, "MCP 도구를 가져오는 데 실패했습니다. MCP 서버가 실행 중인지 확인하세요."
         return []
     
     def _create_graph(self):
@@ -438,6 +537,7 @@ class AutoAgent:
         
         # 노드 추가
         workflow.add_node("planner", create_planner_node(self.model))
+        workflow.add_node("replanner", create_planner_node(self.model))  # 재계획 노드 (같은 함수 재사용)
         workflow.add_node("executor", create_executor_node(self.model, self.tools))
         workflow.add_node("finalizer", create_finalizer_node(self.model))
         workflow.add_node("summarizer", create_summarization_node(self.model))
@@ -451,6 +551,19 @@ class AutoAgent:
             should_continue,
             {
                 "execute": "executor",
+                "replan": "replanner",
+                "finalize": "finalizer",
+                "end": END
+            }
+        )
+        
+        workflow.add_conditional_edges(
+            "replanner",
+            should_continue,
+            {
+                "execute": "executor",
+                "replan": "replanner",
+                "finalize": "finalizer",
                 "end": END
             }
         )
@@ -460,20 +573,13 @@ class AutoAgent:
             should_continue,
             {
                 "execute": "executor",
+                "replan": "replanner",
                 "finalize": "finalizer", 
                 "end": END
             }
         )
         
-        workflow.add_conditional_edges(
-            "finalizer",
-            needs_summarization,
-            {
-                "summarize": "summarizer",
-                "continue": END
-            }
-        )
-        
+        workflow.add_edge("finalizer", END)
         workflow.add_edge("summarizer", END)
         
         return workflow.compile(checkpointer=self.checkpointer)
@@ -530,7 +636,8 @@ async def main():
         # "김치 레시피를 찾아서 단계별로 정리해주세요",
         # "현재 디렉토리의 파일들을 확인하고 README 파일을 작성해주세요",
         # "Python으로 간단한 계산기 프로그램을 만들어주세요"
-        "구글 들어가서 LangGraph 검색하고 github에 들어가서 README.md 첫 줄 출력해줘"
+        # "구글 들어가서 LangGraph 검색하고 github에 들어가서 README.md 첫 줄 출력해줘",
+        "구글 크롬을 켜서 LangGraph를 검색하고 첫 번째 링크를 클릭해서 내용을 요약해줘"
     ]
     
     for i, query in enumerate(test_queries, 1):
