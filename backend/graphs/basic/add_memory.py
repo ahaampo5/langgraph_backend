@@ -21,3 +21,13 @@ graph = graph_builder.compile(checkpointer=memory)
 # except Exception:
 #     # This requires some extra dependencies and is optional
 #     pass
+
+
+config = {
+    "configurable": {
+        "thread_id": "1"
+    }
+}
+graph.invoke(
+    {"messages": [{"role": "user", "content": "My name is Hallo"}]},
+    config=config)
