@@ -1,10 +1,9 @@
 import React from 'react';
 import Message from './Message';
-import './MessageList.css';
 
 const MessageList = ({ messages }) => {
   return (
-    <div className="message-list">
+    <div className="flex flex-col gap-4 pb-4">
       {messages.map((message) => (
         <Message key={message.id} message={message} />
       ))}

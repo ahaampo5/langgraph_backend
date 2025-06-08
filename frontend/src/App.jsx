@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ChatContainer from './components/ChatContainer';
-import './App.css';
 
 const App = () => {
   const [messages, setMessages] = useState([]);
@@ -177,10 +176,10 @@ const App = () => {
   }, []);
 
   return (
-    <div className="app">
-      <header className="header">
-        <h1>🤖 LangGraph Chatbot</h1>
-        <div className={`connection-status ${isConnected ? 'connected' : 'disconnected'}`}>
+    <div className="h-screen flex flex-col bg-gray-50">
+      <header className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-8 py-4 text-center shadow-lg z-50">
+        <h1 className="text-2xl font-semibold m-0">🤖 LangGraph Chatbot</h1>
+        <div className={`mt-2 text-sm font-medium ${isConnected ? 'text-green-400' : 'text-red-400'}`}>
           {isConnecting ? '연결 중...' : isConnected ? '✅ 연결됨' : '❌ 연결 끊김'}
         </div>
       </header>
