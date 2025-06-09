@@ -38,7 +38,7 @@ class WikiEnv(gym.Env):
   def _get_obs(self):
     return self.obs
 
-  def _get_info(self):
+  def get_info(self):
     return {"steps": self.steps, "answer": self.answer}
 
   def reset(self, seed=None, return_info=False, options=None):
@@ -53,7 +53,7 @@ class WikiEnv(gym.Env):
     self.steps = 0
     self.answer = None
     observation = self._get_obs()
-    info = self._get_info()
+    info = self.get_info()
     return (observation, info) if return_info else observation
 
   def construct_lookup_list(self, keyword):
@@ -127,7 +127,7 @@ class WikiEnv(gym.Env):
     action = action.strip()
     if self.answer is not None:  # already finished
       done = True
-      return self.obs, reward, done, self._get_info()
+      return self.obs, reward, done, self.get_info()
     
     if action.startswith("search[") and action.endswith("]"):
       entity = action[len("search["):-1]
@@ -157,7 +157,7 @@ class WikiEnv(gym.Env):
 
     self.steps += 1
 
-    return self.obs, reward, done, self._get_info()
+    return self.obs, reward, done, self.get_info()
   
   def get_time_info(self):
     speed = self.search_time / self.num_searches if self.num_searches else 0

@@ -3,9 +3,11 @@ import re
 import json
 import time
 import os
+import random        # 추가: 무작위 인덱스 셔플용
 from typing import Optional, Any, Dict
 from pydantic import BaseModel
 from langchain.chat_models import init_chat_model
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, ToolMessage, AnyMessage
 from langchain_core.tools import tool
 from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import InMemorySaver
@@ -198,20 +200,20 @@ Start by searching for relevant entities mentioned in the question.
                 ]},
                 config=config
             )
-            
+            # print(response)
             if to_print:
                 print("\nAgent conversation:")
                 for i, message in enumerate(response["messages"]):
-                    role = message.get('role', 'unknown')
-                    content = message.get('content', '')
+                    role = message.type #get('role', 'unknown')
+                    content = message.content #get('content', '')
                     print(f"{i+1}. {role}: {content[:200]}...")
             
             # Extract final answer from response
-            final_message = response["messages"][-1]["content"] if response["messages"] else "No response"
+            final_message = response["messages"][-1].content if response["messages"] else "No response"
             
             # Get environment info if available
             if self.env:
-                info = self.env._get_info()
+                info = self.env.get_info()
             else:
                 info = {"question": question}
                 
@@ -282,6 +284,25 @@ def main():
     
     # Test with wiki environment 
     test_with_wiki_env()
+
+    # 500건 배치 테스트 (temp.py의 로직 이식)
+    print("\n=== Batch 500 Wiki Env Tests ===")
+    agent = ReactAgent(use_genos=True, use_wiki_env=True)
+    if agent.env:
+        idxs = list(range(7405))
+        random.Random(233).shuffle(idxs)
+        rs = []
+        infos = []
+        old_time = time.time()
+        for i in idxs[:500]:
+            r, info = agent.run_question(idx=i, to_print=False)
+            rs.append(info.get('em', r))
+            infos.append(info)
+            # 출력: (누적합, 개수, 평균, 초당 처리 속도)
+            print(sum(rs), len(rs), sum(rs) / len(rs), (time.time() - old_time) / len(rs))
+            print('-----------\n')
+    else:
+        print("Wiki environment not available, skipping 500 batch test")
     
     print("\n=== Implementation Complete ===")
     print("The ReactAgent now implements the logic from temp.py using create_react_agent")
