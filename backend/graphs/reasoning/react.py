@@ -26,7 +26,7 @@ MODEL = "openai:gpt-4o-mini"  # Replace with your model of choice
 
 # Genos API Configuration (from temp.py)
 SERVING_ID = 304
-BEARER_TOKEN = '43554f0a40224a66972b86b7f0ce4eea'
+BEARER_TOKEN = os.getenv("GENOS_BEARER_TOKEN")
 GENOS_URL = 'https://genos.mnc.ai:3443/'
 
 class ReactAgent:

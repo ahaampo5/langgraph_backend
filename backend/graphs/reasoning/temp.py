@@ -1,9 +1,10 @@
 import requests
 import re
 import json
+import os
 
 serving_id = 304
-bearer_token = '43554f0a40224a66972b86b7f0ce4eea'
+bearer_token = os.getenv("GENOS_BEARER_TOKEN")
 genos_url = 'https://genos.mnc.ai:3443/'
 
 url = f"{genos_url}/api/gateway/rep/serving/{serving_id}"
