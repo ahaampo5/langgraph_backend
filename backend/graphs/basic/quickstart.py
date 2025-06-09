@@ -5,7 +5,6 @@
 from pydantic import BaseModel
 from langchain.chat_models import init_chat_model
 from langgraph.prebuilt import create_react_agent
-from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import InMemorySaver
 
 MODEL = "openai:gpt-4o-mini"  # Replace with your model of choice
