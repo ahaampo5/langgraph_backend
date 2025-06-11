@@ -7,7 +7,7 @@ import json
 import logging
 from typing import Dict, Any
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from graphs.agent.autoagent import AutoAgent
+from backend.graphs.agent.autoagent import AutoAgent
 
 logger = logging.getLogger(__name__)
 
