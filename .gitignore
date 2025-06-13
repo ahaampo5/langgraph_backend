@@ -1,4 +1,3 @@
-.env
 .venv
 .vscode
 
@@ -24,3 +23,9 @@ frontend/out/
 # OS
 .DS_Store
 Thumbs.db
+
+# dataset
+raw_data/
+
+# env
+.env

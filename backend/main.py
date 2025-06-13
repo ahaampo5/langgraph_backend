@@ -2,7 +2,7 @@
 import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.v1.routers.ws import chat
+from .api.v1.routers.ws import chat
 
 # 로깅 설정
 logging.basicConfig(

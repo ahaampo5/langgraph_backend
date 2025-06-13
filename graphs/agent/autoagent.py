@@ -503,7 +503,7 @@ class AutoAgent:
             self.mcp_client = MultiServerMCPClient({
                 "math": {
                     "command": "python",
-                    "args": ["/Users/admin/Desktop/workspace/my_github/langgraph_backend/backend/mcp/math/math.py"],
+                    "args": ["/Users/admin/Desktop/workspace/my_github/langgraph_service/backend/mcp/math/math.py"],
                     "transport": "stdio",
                 },
                 # "web_search": {

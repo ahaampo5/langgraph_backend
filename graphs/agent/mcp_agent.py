@@ -7,7 +7,7 @@ client = MultiServerMCPClient(
         "math": {
             "command": "python",
             # Replace with absolute path to your math_server.py file
-            "args": ["/Users/admin/Desktop/workspace/my_github/langgraph_backend/backend/mcp/math/math.py"],
+            "args": ["/Users/admin/Desktop/workspace/my_github/langgraph_service/backend/mcp/math/math.py"],
             "transport": "stdio",
         },
         "weather": {

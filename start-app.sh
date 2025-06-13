@@ -6,8 +6,7 @@ echo "🚀 LangGraph Chatbot 애플리케이션을 시작합니다..."
 
 # 백엔드 실행 (백그라운드)
 echo "📡 백엔드 서버를 시작합니다..."
-cd backend
-python run_server.py &
+uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload &
 BACKEND_PID=$!
 
 # 프론트엔드 실행
