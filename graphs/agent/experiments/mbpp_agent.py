@@ -26,7 +26,13 @@ class MBPPAgent:
     
     def _prompt(self, state: AgentState, config: RunnableConfig) -> list[AnyMessage]:
         user_name = config["configurable"].get("user_name")
-        system_msg = f"You are a helpful assistant."
+        system_msg = """Please refer the given examples and generate a python function for my problem.
+Examples are listed as follows:
+{}
+
+Here is my problem:
+{}
+"""
         print([{"role": "system", "content": system_msg}] + state["messages"])
         return [{"role": "system", "content": system_msg}] + state["messages"]
     

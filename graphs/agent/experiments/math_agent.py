@@ -26,7 +26,7 @@ class MathAgent:
     
     def _prompt(self, state: AgentState, config: RunnableConfig) -> list[AnyMessage]:
         user_name = config["configurable"].get("user_name")
-        system_msg = f"You are a helpful assistant. User's name is {user_name}"
+        system_msg = f"You are a helpful assistant."
         print([{"role": "system", "content": system_msg}] + state["messages"])
         return [{"role": "system", "content": system_msg}] + state["messages"]
     
