@@ -5,13 +5,11 @@ from langgraph.graph import StateGraph, START
 from langchain_core.runnables import RunnableConfig
 from langchain_core.messages import ToolMessage, AIMessage, AnyMessage
 from langgraph.prebuilt import create_react_agent
-from dotenv import load_dotenv
-load_dotenv(dotenv_path="/Users/admin/Desktop/workspace/my_github/langgraph_service/.env")
 
 class WeatherResponse(BaseModel):
     conditions: str
 
-class MathAgent:
+class HotPotQAAgent:
     def __init__(self, model: str = "openai:gpt-4o-mini", user_name: str = "Alice"):
         self.model = model
         self.user_name = user_name
@@ -35,8 +33,8 @@ class MathAgent:
     def _build_graph(self):
         agent = create_react_agent(
             model=self.model,
-            tools=[self.add_number],#self.add_number],
-            # prompt=self._prompt
+            tools=[],#self.add_number],
+            prompt=self._prompt
         )
         
         graph_builder = StateGraph(AgentState)
@@ -73,5 +71,5 @@ class MathAgent:
 
 # 사용 예시
 if __name__ == "__main__":
-    math_agent = MathAgent()
+    math_agent = HotPotQAAgent()
     math_agent.run_interactive()

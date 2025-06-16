@@ -1,7 +1,11 @@
 
 import os
 from langchain_openai import ChatOpenAI, AzureChatOpenAI
-from langchain_core.messages import BaseMessage, AIMessage, AIMessageChunk
+from langchain_core.messages import BaseMessage, AIMessage, AIMessageChunk, BaseMessageChunk
+from typing import Iterator, Generator, Any, AsyncGenerator, AsyncIterator
+
+# 모델 별 기능차이는 아래 링크에서 확인 가능
+# https://python.langchain.com/docs/integrations/chat/
 
 ##### AIMessage #####
 # from langchain_core.messages import HumanMessage, SystemMessage
@@ -36,7 +40,7 @@ from langchain_core.messages import BaseMessage, AIMessage, AIMessageChunk
 #     condition: str = Field(..., description="Weather condition, e.g., sunny, rainy")
 
 class IntegratedLLM:
-    def __init__(self, vendor: str, model_name: str, logprobs: bool = False, base_url: str = None):
+    def __init__(self, vendor: str, model_name: str, logprobs: bool = False, base_url = None):
         self.vendor = vendor
         self.model_name = model_name
         self.logprobs = logprobs
@@ -64,20 +68,21 @@ class IntegratedLLM:
             if not self.api_key:
                 raise ValueError("ANTHROPIC_API_KEY environment variable is not set.")
             self.llm = ChatAnthropic(
-                model=model_name,
+                model_name=model_name,
                 temperature=0,
-                max_tokens=512,
+                max_tokens_to_sample=512,
                 timeout=None,
                 max_retries=2,
                 api_key=self.api_key,
+                stop=None
             )
         elif vendor == "google":
             # pip install -U langchain-google-vertexai
-            from langchain_google_vertexai import ChatGoogle
+            from langchain_google_vertexai import ChatVertexAI
             self.api_key = os.getenv("GOOGLE_API_KEY")
             if not self.api_key:
                 raise ValueError("GOOGLE_API_KEY environment variable is not set.")
-            self.llm = ChatGoogle(
+            self.llm = ChatVertexAI(
                 model=model_name,
                 temperature=0,
                 max_tokens=512,
@@ -124,8 +129,8 @@ class IntegratedLLM:
         """
         response = self.llm.invoke(messages)
         return response
-    
-    def call_stream(self, messages) -> AIMessageChunk:
+
+    def call_stream(self, messages) -> Generator[BaseMessageChunk | BaseMessage, Any, Any]:
         """
         Call the LLM with the provided messages and return a generator for streaming responses.
         :param messages: List of tuples (role, content)
@@ -135,7 +140,7 @@ class IntegratedLLM:
         for chunk in response:
             yield chunk
 
-    async def call_async(self, messages) -> AIMessage:
+    async def call_async(self, messages) -> BaseMessage:
         """
         Asynchronously call the LLM with the provided messages.
         :param messages: List of tuples (role, content)
@@ -143,8 +148,8 @@ class IntegratedLLM:
         """
         response = await self.llm.ainvoke(messages)
         return response
-    
-    async def call_stream_async(self, messages) -> AIMessageChunk:
+
+    async def call_stream_async(self, messages) -> AsyncIterator[BaseMessageChunk]:
         """
         Asynchronously call the LLM with the provided messages and return a generator for streaming responses.
         :param messages: List of tuples (role, content)
