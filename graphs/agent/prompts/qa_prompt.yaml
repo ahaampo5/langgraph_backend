@@ -111,7 +111,6 @@ prompts:
         **Multi-hop Learning Summary**:
         Through this reflexive process, I improved my multi-hop reasoning by:
         [Key insights about complex reasoning and information integration]
-
   squad:
     base_info:
       name: "SQuAD Reading Comprehension"
@@ -1251,6 +1250,253 @@ prompts:
         This reflection improved my factual research by:
         [Key insights about effective fact-finding and verification]
 
+format_usage:
+  description: "How to use response formats in prompts"
+  examples:
+    - "Use {prompts.response_formats.hotpotqa.format_prompt} at the end of your prompt"
+    - "Access format example with {prompts.response_formats.hotpotqa.example}"
+    - "For dynamic format injection: f\"{base_prompt}{prompts.response_formats[dataset].format_prompt}\""
+  
+  integration_template: |
+    # To integrate format enforcement in your agent:
+    # 1. Get the base prompt for your dataset and reasoning type
+    # 2. Append the format_prompt for that dataset
+    # 3. Example:
+    #    base_prompt = prompts.hotpotqa.cot.system_template
+    #    format_prompt = prompts.response_formats.hotpotqa.format_prompt
+    #    final_prompt = f"{base_prompt}\n\n{format_prompt}"
+
+response_formats:
+  hotpotqa:
+    format_prompt: |
+      
+      # Response format (must be strictly followed) (do not include any other formats except for the given XML format):
+      <response>
+      <reasoning>
+      [Your step-by-step reasoning process here - explain how you connect information across multiple sources to answer the multi-hop question]
+      </reasoning>
+      <answer>
+      [Final answer - should be a specific fact, name, number, or yes/no based on the question type]
+      </answer>
+      </response>
+    
+    example: |
+      <response>
+      <reasoning>
+      First, I need to find information about when Barack Obama was born. From the context, I can see that Barack Obama was born on August 4, 1961. Next, I need to find information about what major event happened in 1961. The context mentions that the Berlin Wall was constructed in 1961. Therefore, the major event that happened in the same year Barack Obama was born was the construction of the Berlin Wall.
+      </reasoning>
+      <answer>
+      The construction of the Berlin Wall
+      </answer>
+      </response>
+
+  squad:
+    format_prompt: |
+      
+      # Response format (must be strictly followed) (do not include any other formats except for the given XML format):
+      <response>
+      <reasoning>
+      [Your step-by-step reasoning to locate the answer in the passage]
+      </reasoning>
+      <answer>
+      [Exact text span from the passage that answers the question]
+      </answer>
+      </response>
+    
+    example: |
+      <response>
+      <reasoning>
+      The question asks about the location of the Normans. Looking through the passage, I need to find where it mentions where the Normans were located. The passage states "The Normans were the people who in the 10th and 11th centuries gave their name to Normandy, a region in France." This directly answers the question about their location.
+      </reasoning>
+      <answer>
+      Normandy, a region in France
+      </answer>
+      </response>
+
+  naturalqa:
+    format_prompt: |
+      
+      # Response format (must be strictly followed) (do not include any other formats except for the given XML format):
+      <response>
+      <reasoning>
+      [Your reasoning process to answer this natural question using available knowledge]
+      </reasoning>
+      <answer>
+      [Direct, helpful answer to the user's question]
+      </answer>
+      </response>
+    
+    example: |
+      <response>
+      <reasoning>
+      The user is asking about the capital of Australia. This is a factual question about geography. The capital of Australia is Canberra, which became the capital in 1913. While Sydney and Melbourne are larger cities, Canberra was specifically chosen as the capital city.
+      </reasoning>
+      <answer>
+      Canberra
+      </answer>
+      </response>
+
+  msmarco:
+    format_prompt: |
+      
+      # Response format (must be strictly followed) (do not include any other formats except for the given XML format):
+      <response>
+      <reasoning>
+      [Your reasoning process using the provided web passages to answer the question]
+      </reasoning>
+      <answer>
+      [Answer based on information from the passages]
+      </answer>
+      </response>
+    
+    example: |
+      <response>
+      <reasoning>
+      Looking through the provided passages for information about how photosynthesis works. Passage 2 explains that "photosynthesis is the process by which plants convert light energy into chemical energy, using carbon dioxide and water to produce glucose and oxygen." This gives me the basic mechanism of photosynthesis.
+      </reasoning>
+      <answer>
+      Photosynthesis is the process by which plants convert light energy into chemical energy, using carbon dioxide and water to produce glucose and oxygen.
+      </answer>
+      </response>
+
+  commonsenseqa:
+    format_prompt: |
+      
+      # Response format (must be strictly followed) (do not include any other formats except for the given XML format):
+      <response>
+      <reasoning>
+      [Your commonsense reasoning to evaluate each option and select the best answer]
+      </reasoning>
+      <answer>
+      [Single letter answer: A, B, C, D, or E]
+      </answer>
+      </response>
+    
+    example: |
+      <response>
+      <reasoning>
+      The question asks what happens when someone is falling asleep. Let me evaluate each option: A) "get tired" - this typically happens before falling asleep, not during; B) "dream" - this happens during sleep, not while falling asleep; C) "relax" - this is what naturally happens as someone transitions from wakefulness to sleep; D) "snore" - this happens during sleep, not while falling asleep. Based on common sense, relaxing is what happens during the process of falling asleep.
+      </reasoning>
+      <answer>
+      C
+      </answer>
+      </response>
+
+  drop:
+    format_prompt: |
+      
+      # Response format (must be strictly followed) (do not include any other formats except for the given XML format):
+      <response>
+      <reasoning>
+      [Your step-by-step numerical reasoning and calculations based on the passage]
+      </reasoning>
+      <answer>
+      [Numerical answer or count, with appropriate units if needed]
+      </answer>
+      </response>
+    
+    example: |
+      <response>
+      <reasoning>
+      The question asks how many touchdowns were scored in the first quarter. Looking at the passage, I need to find mentions of touchdowns in the first quarter. The passage states "In the first quarter, Johnson scored a 15-yard touchdown run" and "Smith caught a 22-yard touchdown pass also in the first quarter." That's 2 touchdowns in the first quarter total.
+      </reasoning>
+      <answer>
+      2
+      </answer>
+      </response>
+
+  boolq:
+    format_prompt: |
+      
+      # Response format (must be strictly followed) (do not include any other formats except for the given XML format):
+      <response>
+      <reasoning>
+      [Your reasoning process to determine if the statement is true or false based on the passage]
+      </reasoning>
+      <answer>
+      [Yes or No]
+      </answer>
+      </response>
+    
+    example: |
+      <response>
+      <reasoning>
+      The question asks if cats are mammals. From the passage, I can see that it states "Cats are warm-blooded vertebrates that give birth to live young and nurse them with milk." These are the defining characteristics of mammals - being warm-blooded, giving birth to live young, and producing milk. Therefore, the statement that cats are mammals is true.
+      </reasoning>
+      <answer>
+      Yes
+      </answer>
+      </response>
+
+  quac:
+    format_prompt: |
+      
+      # Response format (must be strictly followed) (do not include any other formats except for the given XML format):
+      <response>
+      <reasoning>
+      [Your reasoning considering the conversation context and current question]
+      </reasoning>
+      <answer>
+      [Conversational answer that fits the dialogue context]
+      </answer>
+      </response>
+    
+    example: |
+      <response>
+      <reasoning>
+      Looking at the conversation history, the previous question was about when the band was formed, and I answered "1985". Now the follow-up question "What about their first album?" is asking about when their first album was released. From the passage, I can see that their first album "Debut Songs" was released in 1987.
+      </reasoning>
+      <answer>
+      Their first album "Debut Songs" was released in 1987.
+      </answer>
+      </response>
+
+  arc:
+    format_prompt: |
+      
+      # Response format (must be strictly followed) (do not include any other formats except for the given XML format):
+      <response>
+      <reasoning>
+      [Your scientific reasoning to evaluate each option and select the best answer]
+      </reasoning>
+      <answer>
+      [Single letter answer: A, B, C, or D]
+      </answer>
+      </response>
+    
+    example: |
+      <response>
+      <reasoning>
+      The question asks what happens to water when it freezes. Let me apply scientific knowledge: A) "it expands" - this is correct, water molecules form a crystalline structure when frozen that takes up more space; B) "it contracts" - this is incorrect, most substances contract when frozen but water is an exception; C) "it stays the same size" - this is incorrect; D) "it disappears" - this is clearly incorrect. Based on scientific principles, water expands when it freezes.
+      </reasoning>
+      <answer>
+      A
+      </answer>
+      </response>
+
+  triviaqa:
+    format_prompt: |
+      
+      # Response format (must be strictly followed) (do not include any other formats except for the given XML format):
+      <response>
+      <reasoning>
+      [Your reasoning process using the supporting documents to find the factual answer]
+      </reasoning>
+      <answer>
+      [Factual answer based on the documents]
+      </answer>
+      </response>
+    
+    example: |
+      <response>
+      <reasoning>
+      The question asks about the author of "Pride and Prejudice." Looking through the supporting documents, Document 1 clearly states "Pride and Prejudice is a novel written by English author Jane Austen, published in 1813." This directly answers the trivia question.
+      </reasoning>
+      <answer>
+      Jane Austen
+      </answer>
+      </response>
+
 tools_config:
   required_tools: ["search_documents", "extract_information"]
   optional_tools: ["calculate_numbers", "verify_facts", "summarize_text"]
@@ -1293,3 +1539,12 @@ usage_examples:
   # Access base information for a benchmark
   # prompts[benchmark].base_info
   # e.g., prompts.hotpotqa.base_info, prompts.naturalqa.base_info
+  
+  # Access response format for a benchmark
+  # prompts.response_formats[benchmark].format_prompt
+  # e.g., prompts.response_formats.hotpotqa.format_prompt
+  
+  # Complete prompt construction example:
+  # base_prompt = prompts.hotpotqa.cot.system_template
+  # format_enforcement = prompts.response_formats.hotpotqa.format_prompt  
+  # final_prompt = f"{base_prompt}\n{format_enforcement}"

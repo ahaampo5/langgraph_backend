@@ -16,12 +16,14 @@ import re
 import string
 import argparse
 import traceback
+import yaml
 from typing import Dict, List, Any, Optional, Tuple
 from dataclasses import dataclass
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from collections import Counter
 from langchain_core.messages import AIMessage
+from pydantic import BaseModel, Field
 
 @dataclass
 class EvaluationResult:
@@ -75,7 +77,8 @@ class HotpotQAEvaluator:
         max_samples: Optional[int] = None,
         parallel_workers: int = 1,  # 안정성을 위해 기본값 1, 필요시 증가 가능
         timestamp: Optional[str] = None,
-        seed: int = 42
+        seed: int = 42,
+        benchmark: str = "hotpotqa"  # 벤치마크 이름 추가
     ):
         self.project_root = Path(__file__).parent.parent.parent.parent
         self.data_path = data_path or str(self.project_root / "raw_data" / "hotpot_dev_fullwiki_v1.json")
@@ -83,6 +86,7 @@ class HotpotQAEvaluator:
         self.max_samples = max_samples
         self.parallel_workers = parallel_workers
         self.seed = seed
+        self.benchmark = benchmark
         
         # timestamp 설정 (지정되지 않으면 현재 시간 사용)
         self.timestamp = timestamp or time.strftime("%Y%m%d_%H%M%S")
@@ -97,6 +101,9 @@ class HotpotQAEvaluator:
         # 결과 저장 디렉토리
         self.results_dir = Path(__file__).parent / "results"
         self.results_dir.mkdir(exist_ok=True)
+        
+        # QA prompts YAML 로드
+        self._load_qa_prompts()
         
         # 중간 결과 저장을 위한 파일 경로들
         self._setup_result_files()
@@ -116,14 +123,48 @@ class HotpotQAEvaluator:
         spec.loader.exec_module(self.agent_module)
         self.logger.info("Agent module loaded successfully")
     
+    def _load_qa_prompts(self):
+        """QA prompts YAML 파일 로드"""
+        try:
+            qa_prompts_path = self.project_root / "graphs" / "agent" / "prompts" / "qa_prompt.yaml"
+            with open(qa_prompts_path, 'r', encoding='utf-8') as f:
+                self.qa_prompts = yaml.safe_load(f)
+            self.logger.info("QA prompts loaded successfully")
+        except Exception as e:
+            self.logger.error(f"Error loading QA prompts: {e}")
+            self.qa_prompts = {}
+    
+    def _get_response_format_model(self):
+        """벤치마크에 맞는 응답 포맷 모델 반환"""
+        return RESPONSE_FORMAT_MODELS.get(self.benchmark, HotpotQAResponse)
+    
     def _initialize_agents(self):
         """QA 에이전트들 초기화"""
         try:
+            # 응답 포맷 모델 가져오기
+            response_format_model = self._get_response_format_model()
+            
             self.agents = {
-                "io": self.agent_module.create_io_qa_agent(model=self.model, benchmark="hotpotqa"),
-                "cot": self.agent_module.create_cot_qa_agent(model=self.model, benchmark="hotpotqa"),
-                "react": self.agent_module.create_react_qa_agent(model=self.model, benchmark="hotpotqa"),
-                "reflexion": self.agent_module.create_reflexion_qa_agent(model=self.model, benchmark="hotpotqa")
+                "io": self.agent_module.create_io_qa_agent(
+                    model=self.model, 
+                    benchmark=self.benchmark,
+                    response_format=response_format_model
+                ),
+                "cot": self.agent_module.create_cot_qa_agent(
+                    model=self.model, 
+                    benchmark=self.benchmark,
+                    response_format=response_format_model
+                ),
+                "react": self.agent_module.create_react_qa_agent(
+                    model=self.model, 
+                    benchmark=self.benchmark,
+                    response_format=response_format_model
+                ),
+                "reflexion": self.agent_module.create_reflexion_qa_agent(
+                    model=self.model, 
+                    benchmark=self.benchmark,
+                    response_format=response_format_model
+                )
             }
             self.logger.info("All QA agents initialized successfully")
         except Exception as e:
@@ -149,22 +190,38 @@ class HotpotQAEvaluator:
             self.logger.error(f"Error loading dataset: {e}")
             raise
     
-    def normalize_answer(self, answer: str) -> str:
-        """답변 정규화 (대소문자, 공백, 구두점 처리)"""
-        answer = re.sub(r"\b(a|an|the)\b", " ", answer)
-        # 소문자 변환
-        answer = answer.lower()
-        # 구두점 제거
-        answer = re.sub(r'[{}]'.format(re.escape(string.punctuation)), ' ', answer)
-        # 연속된 공백을 하나로
-        answer = re.sub(r'\s+', ' ', answer)
-        # 앞뒤 공백 제거
-        answer = answer.strip()
-        
-        return answer
+    def normalize_answer(self, s: str) -> str:
+        """답변 정규화 (AFlow 논문 방식)"""
+        def remove_articles(text):
+            return re.sub(r"\b(a|an|the)\b", " ", text)
+
+        def white_space_fix(text):
+            return " ".join(text.split())
+
+        def remove_punc(text):
+            exclude = set(string.punctuation)
+            return "".join(ch for ch in text if ch not in exclude)
+
+        def lower(text):
+            return text.lower()
+
+        return white_space_fix(remove_articles(remove_punc(lower(s))))
+    
+    def calculate_score(self, ground_truth: str, prediction: str) -> Tuple[float, str]:
+        """F1 점수 계산 (AFlow 논문 방식)"""
+        prediction_tokens = self.normalize_answer(prediction).split()
+        ground_truth_tokens = self.normalize_answer(ground_truth).split()
+        common = Counter(prediction_tokens) & Counter(ground_truth_tokens)
+        num_same = sum(common.values())
+        if num_same == 0:
+            return 0, prediction
+        precision = 1.0 * num_same / len(prediction_tokens)
+        recall = 1.0 * num_same / len(ground_truth_tokens)
+        f1 = (2 * precision * recall) / (precision + recall)
+        return f1, prediction
     
     def evaluate_answer(self, predicted: str, expected: str) -> bool:
-        """답변 정확성 평가"""
+        """답변 정확성 평가 (기존 방식 유지)"""
         pred_normalized = self.normalize_answer(predicted)
         exp_normalized = self.normalize_answer(expected)
         
@@ -179,19 +236,6 @@ class HotpotQAEvaluator:
                 return True
         
         return False
-
-    def evaluate_f1_score(self, predicted: str, expected: str) -> Tuple[float, str]:
-        """F1 점수 계산"""
-        prediction_tokens = self.normalize_answer(predicted).split()
-        ground_truth_tokens = self.normalize_answer(expected).split()
-        common = Counter(prediction_tokens) & Counter(ground_truth_tokens)
-        num_same = sum(common.values())
-        if num_same == 0:
-            return 0.0, predicted
-        precision = 1.0 * num_same / len(prediction_tokens) if len(prediction_tokens) > 0 else 0.0
-        recall = 1.0 * num_same / len(ground_truth_tokens) if len(ground_truth_tokens) > 0 else 0.0
-        f1 = (2 * precision * recall) / (precision + recall) if (precision + recall) > 0 else 0.0
-        return f1, predicted
     
     def extract_final_answer(self, response: str, question_type: str) -> str:
         """응답에서 최종 답변 추출"""
@@ -272,19 +316,38 @@ class HotpotQAEvaluator:
 
             response_time = time.time() - start_time
             
-            # 응답 추출
+            # 응답 추출 - 구조화된 응답 처리
             if result and "messages" in result and result["messages"]:
                 last_message = result["messages"][-1]
+                
+                # 구조화된 응답 처리
                 if hasattr(last_message, 'content'):
                     response_content = last_message.content
+                    # 구조화된 응답인지 확인
+                    if isinstance(response_content, dict):
+                        predicted_answer = response_content.get('answer', '')
+                        reasoning = response_content.get('reasoning', '')
+                        response_content = f"Reasoning: {reasoning}\nAnswer: {predicted_answer}"
+                    elif hasattr(last_message.content, 'answer'):
+                        # Pydantic 모델 응답 처리
+                        predicted_answer = last_message.content.answer
+                        reasoning = getattr(last_message.content, 'reasoning', '')
+                        response_content = f"Reasoning: {reasoning}\nAnswer: {predicted_answer}"
+                    else:
+                        response_content = str(last_message.content)
+                        predicted_answer = self.extract_final_answer(response_content, question_type)
                 else:
                     response_content = str(last_message)
+                    predicted_answer = self.extract_final_answer(response_content, question_type)
             else:
                 response_content = "No response"
-            
-            predicted_answer = self.extract_final_answer(response_content, question_type)
+                predicted_answer = ""
+            f1_score, _ = self.calculate_score(expected_answer, predicted_answer)
             is_correct = self.evaluate_answer(predicted_answer, expected_answer)
-            f1_score, _ = self.evaluate_f1_score(predicted_answer, expected_answer)
+            
+            # F1 점수가 0.3 미만인 경우 mismatch 로그 기록 (AFlow 논문 방식)
+            if f1_score < 0.3:
+                self.log_mismatch(question, expected_answer, response_content, predicted_answer)
             
             return EvaluationResult(
                 reasoning_type=reasoning_type,
@@ -342,29 +405,16 @@ class HotpotQAEvaluator:
         dataset: List[Dict[str, Any]], 
         reasoning_type: str
     ) -> List[EvaluationResult]:
-        """순차 평가 (안전하고 재개 가능)"""
+        """순차 평가 (간단 버전)"""
         results = []
         
         for i, question_data in enumerate(dataset):
-            # 이미 완료된 질문인지 확인
-            if self._is_question_completed(reasoning_type, i):
-                result = self._load_completed_result(reasoning_type, i)
-                results.append(result)
-                self.logger.info(f"Loaded cached result for question {i + 1}/{len(dataset)}")
-                continue
-            
             # 새로운 질문 평가
             result = self.evaluate_single_question(question_data, reasoning_type)
             results.append(result)
             
-            # 중간 저장
-            self._save_progress(reasoning_type, i, result)
-            
             if (i + 1) % 5 == 0:
-                self.logger.info(f"Completed {i + 1}/{len(dataset)} questions")
-                # 중간 통계 저장
-                stats = self._calculate_stats(results, reasoning_type)
-                self._save_intermediate_results(reasoning_type, results, stats)
+                self.logger.info(f"Completed {i + 1}/{len(dataset)} questions for {reasoning_type}")
         
         return results
     
@@ -373,51 +423,38 @@ class HotpotQAEvaluator:
         dataset: List[Dict[str, Any]], 
         reasoning_type: str
     ) -> List[EvaluationResult]:
-        """병렬 평가 (빠르지만 재개 어려움)"""
+        """병렬 평가 (간단 버전)"""
         results: List[Optional[EvaluationResult]] = [None] * len(dataset)
-        completed_count = 0
         
-        # 이미 완료된 작업들 먼저 로드
-        for i, question_data in enumerate(dataset):
-            if self._is_question_completed(reasoning_type, i):
-                results[i] = self._load_completed_result(reasoning_type, i)
-                completed_count += 1
-        
-        # 남은 작업들을 병렬로 처리
-        remaining_indices = [i for i in range(len(dataset)) if results[i] is None]
-        
-        if remaining_indices:
-            with ThreadPoolExecutor(max_workers=self.parallel_workers) as executor:
-                future_to_index = {
-                    executor.submit(self.evaluate_single_question, dataset[i], reasoning_type): i
-                    for i in remaining_indices
-                }
-                
-                for future in as_completed(future_to_index):
-                    index = future_to_index[future]
-                    try:
-                        result = future.result()
-                        results[index] = result
-                        completed_count += 1
-                        
-                        # 중간 저장
-                        self._save_progress(reasoning_type, index, result)
-                        
-                        if completed_count % 5 == 0:
-                            self.logger.info(f"Completed {completed_count}/{len(dataset)} questions")
-                    except Exception as e:
-                        self.logger.error(f"Error in parallel evaluation for question {index}: {e}")
-                        results[index] = EvaluationResult(
-                            reasoning_type=reasoning_type,
-                            question=dataset[index]["question"],
-                            expected_answer=dataset[index]["answer"],
-                            predicted_answer="ERROR",
-                            is_correct=False,
-                            response_time=0.0,
-                            question_type=dataset[index]["type"],
-                            f1_score=0.0,
-                            error=str(e)
-                        )
+        with ThreadPoolExecutor(max_workers=self.parallel_workers) as executor:
+            future_to_index = {
+                executor.submit(self.evaluate_single_question, dataset[i], reasoning_type): i
+                for i in range(len(dataset))
+            }
+            
+            completed_count = 0
+            for future in as_completed(future_to_index):
+                index = future_to_index[future]
+                try:
+                    result = future.result()
+                    results[index] = result
+                    completed_count += 1
+                    
+                    if completed_count % 5 == 0:
+                        self.logger.info(f"Completed {completed_count}/{len(dataset)} questions for {reasoning_type}")
+                except Exception as e:
+                    self.logger.error(f"Error in parallel evaluation for question {index}: {e}")
+                    results[index] = EvaluationResult(
+                        reasoning_type=reasoning_type,
+                        question=dataset[index]["question"],
+                        expected_answer=dataset[index]["answer"],
+                        predicted_answer="ERROR",
+                        is_correct=False,
+                        response_time=0.0,
+                        question_type=dataset[index]["type"],
+                        f1_score=0.0,
+                        error=str(e)
+                    )
         
         return [r for r in results if r is not None]
     
@@ -492,72 +529,25 @@ class HotpotQAEvaluator:
         )
     
     def _setup_result_files(self):
-        """중간 결과 저장을 위한 파일 경로 설정"""
+        """결과 저장을 위한 파일 경로 설정 (간소화 버전)"""
         self.detailed_file = self.results_dir / f"hotpotqa_detailed_results_{self.timestamp}.json"
         self.summary_file = self.results_dir / f"hotpotqa_summary_{self.timestamp}.json"
-        self.progress_file = self.results_dir / f"hotpotqa_progress_{self.timestamp}.json"
         
-        # 진행 상황 파일이 존재하면 로드
-        self.completed_questions = {}
-        if self.progress_file.exists():
-            try:
-                with open(self.progress_file, 'r', encoding='utf-8') as f:
-                    self.completed_questions = json.load(f)
-                self.logger.info(f"Loaded progress from {self.progress_file}")
-                self.logger.info(f"Previously completed: {sum(len(v) for v in self.completed_questions.values())} questions")
-            except Exception as e:
-                self.logger.warning(f"Could not load progress file: {e}")
-                self.completed_questions = {}
+        # mismatch 로깅을 위한 파일 경로 설정
+        self.mismatch_log_file = self.results_dir / f"hotpotqa_mismatches_{self.timestamp}.log"
     
-    def _save_progress(self, reasoning_type: str, question_idx: int, result: EvaluationResult):
-        """진행 상황을 중간 저장"""
-        if reasoning_type not in self.completed_questions:
-            self.completed_questions[reasoning_type] = {}
-        
-        self.completed_questions[reasoning_type][str(question_idx)] = {
-            "question": result.question,
-            "expected_answer": result.expected_answer,
-            "predicted_answer": result.predicted_answer,
-            "is_correct": result.is_correct,
-            "response_time": result.response_time,
-            "question_type": result.question_type,
-            "f1_score": result.f1_score,
-            "total_calls": result.total_calls,
-            "total_completion_tokens": result.total_completion_tokens,
-            "total_prompt_tokens": result.total_prompt_tokens,
-            "error": result.error
-        }
-        
-        # 진행 상황 저장
+    def log_mismatch(self, question: str, expected: str, predicted: str, extracted: str):
+        """잘못 예측된 질문들을 로그로 기록 (AFlow 논문 방식)"""
         try:
-            with open(self.progress_file, 'w', encoding='utf-8') as f:
-                json.dump(self.completed_questions, f, indent=2, ensure_ascii=False)
+            with open(self.mismatch_log_file, 'a', encoding='utf-8') as f:
+                f.write(f"Question: {question}\n")
+                f.write(f"Expected: {expected}\n") 
+                f.write(f"Predicted: {predicted}\n")
+                f.write(f"Extracted: {extracted}\n")
+                f.write("-" * 80 + "\n")
         except Exception as e:
-            self.logger.warning(f"Could not save progress: {e}")
+            self.logger.warning(f"Could not log mismatch: {e}")
     
-    def _is_question_completed(self, reasoning_type: str, question_idx: int) -> bool:
-        """특정 질문이 이미 완료되었는지 확인"""
-        return (reasoning_type in self.completed_questions and 
-                str(question_idx) in self.completed_questions[reasoning_type])
-    
-    def _load_completed_result(self, reasoning_type: str, question_idx: int) -> EvaluationResult:
-        """완료된 결과 로드"""
-        data = self.completed_questions[reasoning_type][str(question_idx)]
-        return EvaluationResult(
-            reasoning_type=reasoning_type,
-            question=data["question"],
-            expected_answer=data["expected_answer"],
-            predicted_answer=data["predicted_answer"],
-            is_correct=data["is_correct"],
-            response_time=data["response_time"],
-            question_type=data["question_type"],
-            f1_score=data.get("f1_score", 0.0),
-            total_calls=data.get("total_calls", 0),
-            total_completion_tokens=data.get("total_completion_tokens", 0),
-            total_prompt_tokens=data.get("total_prompt_tokens", 0),
-            error=data.get("error")
-        )
-
     def save_results(
         self, 
         all_results: Dict[str, List[EvaluationResult]], 
@@ -703,13 +693,6 @@ class HotpotQAEvaluator:
         print("🚀 Starting HotpotQA benchmark evaluation...")
         print(f"📁 Results will be saved with timestamp: {self.timestamp}")
         
-        # 이전 진행 상황이 있는 경우 출력
-        if self.completed_questions:
-            total_completed = sum(len(v) for v in self.completed_questions.values())
-            print(f"📊 Found {total_completed} previously completed questions")
-            for reasoning_type, questions in self.completed_questions.items():
-                print(f"   - {reasoning_type}: {len(questions)} questions")
-        
         dataset = self.load_dataset()
         all_results = {}
         all_stats = {}
@@ -805,6 +788,72 @@ class HotpotQAEvaluator:
             print(f"  Most Token Efficient: {most_efficient[0].upper()} ({most_efficient[1].avg_total_tokens_per_question:.0f} tokens/question)")
 
 
+# Response format models for LangGraph structured output
+class HotpotQAResponse(BaseModel):
+    """HotpotQA 응답 포맷"""
+    reasoning: str = Field(description="Your step-by-step reasoning process here - explain how you connect information across multiple sources to answer the multi-hop question")
+    answer: str = Field(description="Final answer - should be a specific fact, name, number, or yes/no based on the question type")
+
+class SquadResponse(BaseModel):
+    """SQuAD 응답 포맷"""
+    reasoning: str = Field(description="Your step-by-step reasoning to locate the answer in the passage")
+    answer: str = Field(description="Exact text span from the passage that answers the question")
+
+class NaturalQAResponse(BaseModel):
+    """Natural Questions 응답 포맷"""
+    reasoning: str = Field(description="Your reasoning process to answer this natural question using available knowledge")
+    answer: str = Field(description="Direct, helpful answer to the user's question")
+
+class MSMarcoResponse(BaseModel):
+    """MS MARCO 응답 포맷"""
+    reasoning: str = Field(description="Your reasoning process using the provided web passages to answer the question")
+    answer: str = Field(description="Answer based on information from the passages")
+
+class CommonSenseQAResponse(BaseModel):
+    """CommonsenseQA 응답 포맷"""
+    reasoning: str = Field(description="Your commonsense reasoning to evaluate each option and select the best answer")
+    answer: str = Field(description="Single letter answer: A, B, C, D, or E")
+
+class DropResponse(BaseModel):
+    """DROP 응답 포맷"""
+    reasoning: str = Field(description="Your step-by-step numerical reasoning and calculations based on the passage")
+    answer: str = Field(description="Numerical answer or count, with appropriate units if needed")
+
+class BoolQResponse(BaseModel):
+    """BoolQ 응답 포맷"""
+    reasoning: str = Field(description="Your reasoning process to determine if the statement is true or false based on the passage")
+    answer: str = Field(description="Yes or No")
+
+class QuacResponse(BaseModel):
+    """QuAC 응답 포맷"""
+    reasoning: str = Field(description="Your reasoning considering the conversation context and current question")
+    answer: str = Field(description="Conversational answer that fits the dialogue context")
+
+class ArcResponse(BaseModel):
+    """ARC 응답 포맷"""
+    reasoning: str = Field(description="Your scientific reasoning to evaluate each option and select the best answer")
+    answer: str = Field(description="Single letter answer: A, B, C, or D")
+
+class TriviaQAResponse(BaseModel):
+    """TriviaQA 응답 포맷"""
+    reasoning: str = Field(description="Your reasoning process using the supporting documents to find the factual answer")
+    answer: str = Field(description="Factual answer based on the documents")
+
+# Response format mapping
+RESPONSE_FORMAT_MODELS = {
+    "hotpotqa": HotpotQAResponse,
+    "squad": SquadResponse,
+    "naturalqa": NaturalQAResponse,
+    "msmarco": MSMarcoResponse,
+    "commonsenseqa": CommonSenseQAResponse,
+    "drop": DropResponse,
+    "boolq": BoolQResponse,
+    "quac": QuacResponse,
+    "arc": ArcResponse,
+    "triviaqa": TriviaQAResponse,
+}
+
+
 def main():
     """메인 실행 함수"""
     import argparse
@@ -814,10 +863,11 @@ def main():
     parser.add_argument("--model", type=str, default="openai:gpt-4o-mini", help="Model to use")
     parser.add_argument("--timestamp", type=str, help="Timestamp for continuing previous evaluation (format: YYYYMMDD_HHMMSS)")
     parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducible sampling")
+    parser.add_argument("--benchmark", type=str, default="hotpotqa", help="Benchmark dataset name")
     
     args = parser.parse_args()
     
-    print(f"🧪 HotpotQA Evaluation with {args.max_samples} questions")
+    print(f"🧪 {args.benchmark.upper()} Evaluation with {args.max_samples} questions")
     if args.timestamp:
         print(f"📁 Using timestamp: {args.timestamp} (continuing previous evaluation)")
     print(f"🎲 Using seed: {args.seed}")
@@ -827,7 +877,8 @@ def main():
         max_samples=args.max_samples,
         model=args.model,
         timestamp=args.timestamp,
-        seed=args.seed
+        seed=args.seed,
+        benchmark=args.benchmark
     )
     
     try:
