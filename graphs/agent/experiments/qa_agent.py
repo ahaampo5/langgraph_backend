@@ -57,7 +57,7 @@ def calculate_numbers(expression: str) -> str:
 def create_cot_qa_agent(
     model: str = "openai:gpt-4o-mini",
     benchmark: str = "hotpotqa",
-    tools: Optional[List[BaseTool]] = None,
+    tools: Optional[List[BaseTool]] = [],
     **kwargs
 ) -> CompiledGraph:
     """
@@ -75,14 +75,14 @@ def create_cot_qa_agent(
     prompts = load_qa_prompts()
     
     # 기본 도구 설정
-    default_tools = [search_documents, extract_information, verify_facts, calculate_numbers]
-    if tools:
-        default_tools.extend(tools)
+    # default_tools = [search_documents, extract_information, verify_facts, calculate_numbers]
+    # if tools:
+    #     default_tools.extend(tools)
     
     # CoT 프롬프트 가져오기
     cot_template = ""
     if prompts and benchmark in prompts.get("prompts", {}):
-        cot_template = prompts["prompts"][benchmark].get("cot", {}).get("template", "")
+        cot_template = prompts["prompts"][benchmark].get("cot", {}).get("system_template", "")
     
     if not cot_template:
         cot_template = """
@@ -108,7 +108,7 @@ def create_cot_qa_agent(
     
     return create_react_agent(
         model=model,
-        tools=default_tools,
+        tools=tools,
         prompt=system_prompt,
         **kwargs
     )
@@ -117,7 +117,7 @@ def create_cot_qa_agent(
 def create_react_qa_agent(
     model: str = "openai:gpt-4o-mini",
     benchmark: str = "hotpotqa",
-    tools: Optional[List[BaseTool]] = None,
+    tools: Optional[List[BaseTool]] = [],
     **kwargs
 ) -> CompiledGraph:
     """
@@ -135,9 +135,9 @@ def create_react_qa_agent(
     prompts = load_qa_prompts()
     
     # 기본 도구 설정
-    default_tools = [search_documents, extract_information, verify_facts, calculate_numbers]
-    if tools:
-        default_tools.extend(tools)
+    # default_tools = [search_documents, extract_information, verify_facts, calculate_numbers]
+    # if tools:
+    #     default_tools.extend(tools)
     
     # ReAct 프롬프트 가져오기
     react_template = ""
@@ -169,7 +169,7 @@ def create_react_qa_agent(
     
     return create_react_agent(
         model=model,
-        tools=default_tools,
+        tools=tools,
         prompt=system_prompt,
         **kwargs
     )
@@ -178,7 +178,7 @@ def create_react_qa_agent(
 def create_reflexion_qa_agent(
     model: str = "openai:gpt-4o-mini",
     benchmark: str = "hotpotqa",
-    tools: Optional[List[BaseTool]] = None,
+    tools: Optional[List[BaseTool]] = [],
     **kwargs
 ) -> CompiledGraph:
     """
@@ -196,9 +196,9 @@ def create_reflexion_qa_agent(
     prompts = load_qa_prompts()
     
     # 기본 도구 설정
-    default_tools = [search_documents, extract_information, verify_facts, calculate_numbers]
-    if tools:
-        default_tools.extend(tools)
+    # default_tools = [search_documents, extract_information, verify_facts, calculate_numbers]
+    # if tools:
+    #     default_tools.extend(tools)
     
     # Reflexion 프롬프트 가져오기
     reflexion_template = ""
@@ -240,10 +240,63 @@ def create_reflexion_qa_agent(
     
     return create_react_agent(
         model=model,
-        tools=default_tools,
+        tools=tools,
         prompt=system_prompt,
         **kwargs
     )
+
+
+def create_io_qa_agent(
+    model: str = "openai:gpt-4o-mini",
+    benchmark: str = "hotpotqa",
+    **kwargs
+) -> CompiledGraph:
+    """
+    Input-Output (IO) QA Agent를 생성합니다.
+    추가적인 프롬프트 없이 질문을 직접 입력하는 기본적인 방법입니다.
+    
+    Args:
+        model: 사용할 언어 모델
+        benchmark: QA 벤치마크 타입 (hotpotqa, squad, naturalqa 등)
+        **kwargs: create_react_agent에 전달할 추가 인자
+    
+    Returns:
+        CompiledGraph: 컴파일된 LangGraph 에이전트
+    """
+    # IO 방식은 도구 없이 직접 답변
+    from langchain_core.language_models import BaseChatModel
+    from langgraph.graph import StateGraph, START, END
+    from langgraph.graph.message import add_messages
+    from typing_extensions import Annotated, TypedDict
+    from langchain_core.messages import BaseMessage
+    
+    # 모델 로딩
+    if model.startswith("openai:"):
+        from langchain_openai import ChatOpenAI
+        model_name = model.replace("openai:", "")
+        llm = ChatOpenAI(model=model_name, temperature=0)
+    elif model.startswith("anthropic:"):
+        from langchain_anthropic import ChatAnthropic
+        model_name = model.replace("anthropic:", "")
+        llm = ChatAnthropic(model_name=model_name, temperature=0, timeout=60, stop=None)
+    else:
+        raise ValueError(f"Unsupported model: {model}")
+    
+    # 상태 정의
+    class State(TypedDict):
+        messages: Annotated[list[BaseMessage], add_messages]
+    
+    # 간단한 응답 노드
+    def respond(state: State):
+        return {"messages": [llm.invoke(state["messages"])]}
+    
+    # 그래프 구성
+    workflow = StateGraph(State)
+    workflow.add_node("respond", respond)
+    workflow.add_edge(START, "respond")
+    workflow.add_edge("respond", END)
+    
+    return workflow.compile()
 
 
 def create_qa_agent(
@@ -319,6 +372,10 @@ if __name__ == "__main__":
     # Reflexion Agent 테스트
     print("\n=== Reflexion QA Agent ===")
     reflexion_agent = create_reflexion_qa_agent(benchmark="hotpotqa")
+    
+    # IO Agent 테스트
+    print("\n=== IO QA Agent ===")
+    io_agent = create_io_qa_agent(benchmark="hotpotqa")
     
     # 통합 함수로 Agent 생성
     print("\n=== Using create_qa_agent function ===")

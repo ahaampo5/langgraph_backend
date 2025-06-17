@@ -7,7 +7,6 @@
 ```
 evaluate/benchmark_test/hotpotqa/
 ├── evaluator.py          # 메인 평가기 (전체 기능)
-├── simple_evaluator.py   # 간단한 평가기 (import 문제 해결)
 ├── run_benchmark.py      # 다양한 시나리오 실행 스크립트
 ├── test_evaluator.py     # 평가기 테스트 스크립트
 ├── analyze_results.py    # 결과 분석 (차트 포함)
@@ -21,8 +20,9 @@ evaluate/benchmark_test/hotpotqa/
 ### 1. 테스트 명령어 (3개 질문)
 ```bash
 cd /Users/admin/Desktop/workspace/my_github/langgraph_service
-python evaluate/benchmark_test/hotpotqa/simple_evaluator.py --max-samples 3 --seed 42 --timestamp 20250617_143022
+python evaluate/benchmark_test/hotpotqa/evaluator.py --max-samples 50 --seed 42 --timestamp 20250617_143022
 ```
+- **timestamp**: 중간에 멈춘 평가를 이어서 진행하기 위해 파일 명을 결정하는 timestamp 값을 지정할 수 있음
 
 ## 📊 평가 방법론
 
@@ -166,21 +166,6 @@ python simple_evaluator.py --model "anthropic:claude-3-haiku-latest"
 python simple_evaluator.py --max-samples 5 --workers 1
 ```
 
-### 성능 최적화
-
-#### 병렬 처리
-```bash
-# 더 많은 워커 사용 (신중하게)
-python simple_evaluator.py --workers 3
-```
-
-#### 배치 크기 조정
-```bash
-# 작은 배치로 여러 번 실행
-python simple_evaluator.py --max-samples 20
-python simple_evaluator.py --max-samples 20  # 추가 실행
-```
-
 ## 📊 예시 결과
 
 ### 성능 비교 예시
@@ -238,21 +223,4 @@ python simple_evaluator.py --max-samples 50 && python simple_analyze.py
 - 대규모 평가시 API 비용 고려 필요
 - 응답 시간은 네트워크 상황에 따라 변동 가능
 
-## 🤝 기여하기
-
-### 새로운 평가 메트릭 추가
-1. `evaluator.py`의 `_calculate_stats` 메서드 수정
-2. 결과 출력 부분에 새 메트릭 추가
-
-### 새로운 분석 기능 추가
-1. `simple_analyze.py`에 새 분석 메서드 추가
-2. 텍스트 보고서 형식 확장
-
-### 버그 리포트
-- 평가 결과가 예상과 다른 경우
-- Import 오류나 런타임 오류 발생시
-- 성능 문제나 메모리 사용량 이슈
-
 ---
-
-**💡 팁**: 첫 사용시에는 `--max-samples 3`으로 시작해서 시스템이 정상 작동하는지 확인한 후 점진적으로 샘플 수를 늘려보세요!
