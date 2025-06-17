@@ -23,8 +23,12 @@ from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from collections import Counter
 from langchain_core.messages import AIMessage
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, create_model
+from abc import ABC, abstractmethod
 
+sys.path.append(str(Path(__file__).parent.parent))
+
+from formatter import BaseFormatter, XmlFormatter, CodeFormatter, TextFormatter
 @dataclass
 class EvaluationResult:
     """평가 결과 데이터 클래스"""
@@ -67,6 +71,7 @@ class BenchmarkStats:
     avg_total_tokens_per_question: float = 0.0
 
 
+
 class HotpotQAEvaluator:
     """HotpotQA 벤치마크 평가기 - 완전 기능 통합 버전"""
     
@@ -105,6 +110,9 @@ class HotpotQAEvaluator:
         # QA prompts YAML 로드
         self._load_qa_prompts()
         
+        # Formatter 초기화
+        self._initialize_formatters()
+        
         # 중간 결과 저장을 위한 파일 경로들
         self._setup_result_files()
         
@@ -138,35 +146,132 @@ class HotpotQAEvaluator:
         """벤치마크에 맞는 응답 포맷 모델 반환"""
         return RESPONSE_FORMAT_MODELS.get(self.benchmark, HotpotQAResponse)
     
-    def _initialize_agents(self):
-        """QA 에이전트들 초기화"""
+    def _initialize_formatters(self):
+        """벤치마크별 formatter 초기화 - format_type을 기반으로 구분"""
         try:
-            # 응답 포맷 모델 가져오기
+            # 벤치마크에 맞는 응답 포맷 모델 가져오기
             response_format_model = self._get_response_format_model()
             
+            # QA prompts에서 format_type 가져오기
+            format_type = None
+            if (self.qa_prompts and 
+                'response_formats' in self.qa_prompts and 
+                self.benchmark in self.qa_prompts['response_formats']):
+                format_type = self.qa_prompts['response_formats'][self.benchmark].get('format_type', 'xml')
+            else:
+                format_type = 'xml'  # 기본값
+            
+            # format_type에 따라 formatter 초기화
+            if format_type == 'xml':
+                self.xml_formatter = XmlFormatter.from_model(response_format_model)
+                self.code_formatter = None
+                self.text_formatter = None
+                self.primary_formatter = self.xml_formatter
+            elif format_type == 'code':
+                self.xml_formatter = None
+                self.code_formatter = CodeFormatter.create()
+                self.text_formatter = None
+                self.primary_formatter = self.code_formatter
+            else:  # text 또는 기타
+                self.xml_formatter = None
+                self.code_formatter = None
+                self.text_formatter = TextFormatter()
+                self.primary_formatter = self.text_formatter
+            
+            self.logger.info(f"Formatter initialized successfully: {format_type}")
+        except Exception as e:
+            self.logger.error(f"Error initializing formatters: {e}")
+            # 기본 formatter 설정
+            self.xml_formatter = None
+            self.code_formatter = CodeFormatter.create()
+            self.text_formatter = TextFormatter()
+            self.primary_formatter = self.text_formatter
+    
+    def get_formatter_for_reasoning_type(self, reasoning_type: str) -> BaseFormatter:
+        """추론 타입에 맞는 formatter 반환"""
+        # primary_formatter를 사용하여 설정된 formatter 반환
+        if hasattr(self, 'primary_formatter') and self.primary_formatter is not None:
+            return self.primary_formatter
+        else:
+            # 기본값으로 text formatter 반환
+            return TextFormatter()
+    
+    def prepare_prompt_with_format(self, base_prompt: str, reasoning_type: str) -> str:
+        """기본 프롬프트에 포맷 지시사항 추가 - response_formats에서 format_prompt 가져와서 추가"""
+        # QA prompts에서 format_prompt 가져오기
+        format_prompt = ""
+        if (self.qa_prompts and 
+            'response_formats' in self.qa_prompts and 
+            self.benchmark in self.qa_prompts['response_formats']):
+            format_prompt = self.qa_prompts['response_formats'][self.benchmark].get('format_prompt', '')
+        
+        # format_prompt가 있으면 base_prompt에 추가
+        if format_prompt:
+            formatter = self.get_formatter_for_reasoning_type(reasoning_type)
+            formatted_prompt = f"{base_prompt}\n\n{format_prompt}"
+            formatted_prompt = formatter.prepare_prompt(formatted_prompt)
+        else:
+            # 기본 formatter 사용
+            formatter = self.get_formatter_for_reasoning_type(reasoning_type)
+            formatted_prompt = formatter.prepare_prompt(base_prompt)
+        
+        return formatted_prompt
+    
+    def parse_response_with_format(self, response: str, reasoning_type: str) -> Tuple[bool, Any]:
+        """응답을 파싱하고 검증 - format_type에 따라 적절한 formatter 사용"""
+        # format_type에 따라 적절한 응답 파싱 수행
+        format_type = None
+        if (self.qa_prompts and 
+            'response_formats' in self.qa_prompts and 
+            self.benchmark in self.qa_prompts['response_formats']):
+            format_type = self.qa_prompts['response_formats'][self.benchmark].get('format_type', 'xml')
+        else:
+            format_type = 'xml'
+        
+        # format_type에 따라 파싱 방법 선택
+        if format_type == 'xml':
+            # XML 형태의 응답 파싱
+            import re
+            reasoning_pattern = r'<reasoning>(.*?)</reasoning>'
+            answer_pattern = r'<answer>(.*?)</answer>'
+            
+            reasoning_match = re.search(reasoning_pattern, response, re.DOTALL)
+            answer_match = re.search(answer_pattern, response, re.DOTALL)
+            
+            if reasoning_match and answer_match:
+                reasoning = reasoning_match.group(1).strip()
+                answer = answer_match.group(1).strip()
+                return True, {'reasoning': reasoning, 'answer': answer}
+            else:
+                return False, {'reasoning': '', 'answer': response.strip()}
+        else:
+            # 기본 formatter 사용
+            formatter = self.get_formatter_for_reasoning_type(reasoning_type)
+            return formatter.validate_response(response)
+    
+    def _initialize_agents(self):
+        """QA 에이전트들 초기화 - formatter를 사용하여 프롬프트 레벨에서 포맷 처리"""
+        try:
+            # response_format을 제거하고 프롬프트 레벨에서 포맷 처리
             self.agents = {
                 "io": self.agent_module.create_io_qa_agent(
                     model=self.model, 
-                    benchmark=self.benchmark,
-                    response_format=response_format_model
+                    benchmark=self.benchmark
                 ),
                 "cot": self.agent_module.create_cot_qa_agent(
                     model=self.model, 
-                    benchmark=self.benchmark,
-                    response_format=response_format_model
+                    benchmark=self.benchmark
                 ),
                 "react": self.agent_module.create_react_qa_agent(
                     model=self.model, 
-                    benchmark=self.benchmark,
-                    response_format=response_format_model
+                    benchmark=self.benchmark
                 ),
                 "reflexion": self.agent_module.create_reflexion_qa_agent(
                     model=self.model, 
-                    benchmark=self.benchmark,
-                    response_format=response_format_model
+                    benchmark=self.benchmark
                 )
             }
-            self.logger.info("All QA agents initialized successfully")
+            self.logger.info("All QA agents initialized successfully (without response_format)")
         except Exception as e:
             self.logger.error(f"Error initializing agents: {e}")
             raise
@@ -283,13 +388,18 @@ class HotpotQAEvaluator:
         question_data: Dict[str, Any], 
         reasoning_type: str
     ) -> EvaluationResult:
-        """단일 질문 평가"""
+        """단일 질문 평가 - formatter를 사용하여 프롬프트 레벨에서 포맷 처리"""
         question = question_data["question"]
         expected_answer = question_data["answer"]
         question_type = question_data["type"]
         paragraphs = [item[1] for item in question_data["context"] if isinstance(item[1], list)]
         context_str = "\n".join(" ".join(paragraph) for paragraph in paragraphs)
-        inputs = f"Context: {context_str}\n\nQuestion: {question}\n\nAnswer:"
+        
+        # 기본 프롬프트 생성
+        base_prompt = f"Context: {context_str}\n\nQuestion: {question}\n\nAnswer:"
+        
+        # Formatter를 사용하여 포맷 지시사항이 포함된 프롬프트 생성
+        formatted_prompt = self.prepare_prompt_with_format(base_prompt, reasoning_type)
 
         total_calls = 0
         total_completion_tokens = 0
@@ -297,10 +407,10 @@ class HotpotQAEvaluator:
         try:
             start_time = time.time()
             
-            # 에이전트 실행
+            # 에이전트 실행 (포맷 지시사항이 포함된 프롬프트 사용)
             agent = self.agents[reasoning_type]
             result = agent.invoke({
-                "messages": [{"role": "user", "content": inputs}]
+                "messages": [{"role": "user", "content": formatted_prompt}]
             })
 
             
@@ -316,32 +426,35 @@ class HotpotQAEvaluator:
 
             response_time = time.time() - start_time
             
-            # 응답 추출 - 구조화된 응답 처리
+            # 응답 추출 및 formatter를 사용한 파싱
             if result and "messages" in result and result["messages"]:
                 last_message = result["messages"][-1]
                 
-                # 구조화된 응답 처리
                 if hasattr(last_message, 'content'):
-                    response_content = last_message.content
-                    # 구조화된 응답인지 확인
-                    if isinstance(response_content, dict):
-                        predicted_answer = response_content.get('answer', '')
-                        reasoning = response_content.get('reasoning', '')
-                        response_content = f"Reasoning: {reasoning}\nAnswer: {predicted_answer}"
-                    elif hasattr(last_message.content, 'answer'):
-                        # Pydantic 모델 응답 처리
-                        predicted_answer = last_message.content.answer
-                        reasoning = getattr(last_message.content, 'reasoning', '')
-                        response_content = f"Reasoning: {reasoning}\nAnswer: {predicted_answer}"
-                    else:
-                        response_content = str(last_message.content)
-                        predicted_answer = self.extract_final_answer(response_content, question_type)
+                    response_content = str(last_message.content)
                 else:
                     response_content = str(last_message)
+                
+                # Formatter를 사용하여 응답 파싱
+                is_format_valid, parsed_content = self.parse_response_with_format(response_content, reasoning_type)
+                
+                if is_format_valid and isinstance(parsed_content, dict):
+                    # XML 포맷에서 답변 추출
+                    predicted_answer = parsed_content.get('answer', '')
+                    if not predicted_answer:
+                        # 다른 필드명으로 시도
+                        predicted_answer = parsed_content.get('response', '')
+                    
+                    # 여전히 답변이 없으면 기존 방식으로 추출
+                    if not predicted_answer:
+                        predicted_answer = self.extract_final_answer(response_content, question_type)
+                else:
+                    # 포맷 파싱에 실패하면 기존 방식으로 답변 추출
                     predicted_answer = self.extract_final_answer(response_content, question_type)
             else:
                 response_content = "No response"
                 predicted_answer = ""
+                
             f1_score, _ = self.calculate_score(expected_answer, predicted_answer)
             is_correct = self.evaluate_answer(predicted_answer, expected_answer)
             
@@ -791,8 +904,10 @@ class HotpotQAEvaluator:
 # Response format models for LangGraph structured output
 class HotpotQAResponse(BaseModel):
     """HotpotQA 응답 포맷"""
-    reasoning: str = Field(description="Your step-by-step reasoning process here - explain how you connect information across multiple sources to answer the multi-hop question")
-    answer: str = Field(description="Final answer - should be a specific fact, name, number, or yes/no based on the question type")
+    # reasoning: str = Field(description="Your step-by-step reasoning process here - explain how you connect information across multiple sources to answer the multi-hop question")
+    # answer: str = Field(description="Final answer - should be a specific fact, name, number, or yes/no based on the question type")
+    reasoning: str = Field(description="he step by step thinking process")
+    answer: str = Field(description="The final answer to the question")
 
 class SquadResponse(BaseModel):
     """SQuAD 응답 포맷"""
@@ -854,6 +969,75 @@ RESPONSE_FORMAT_MODELS = {
 }
 
 
+def test_formatter_functionality():
+    """formatter 기능 테스트"""
+    print("🧪 Testing formatter functionality...")
+    
+    evaluator = HotpotQAEvaluator(
+        max_samples=1,
+        model="openai:gpt-4o-mini",
+        benchmark="hotpotqa"
+    )
+    
+    # format_type 확인
+    format_type = None
+    if (evaluator.qa_prompts and 
+        'response_formats' in evaluator.qa_prompts and 
+        evaluator.benchmark in evaluator.qa_prompts['response_formats']):
+        format_type = evaluator.qa_prompts['response_formats'][evaluator.benchmark].get('format_type')
+    
+    print(f"📋 Format type for {evaluator.benchmark}: {format_type}")
+    
+    # format_prompt 확인
+    format_prompt = ""
+    if (evaluator.qa_prompts and 
+        'response_formats' in evaluator.qa_prompts and 
+        evaluator.benchmark in evaluator.qa_prompts['response_formats']):
+        format_prompt = evaluator.qa_prompts['response_formats'][evaluator.benchmark].get('format_prompt', '')
+    
+    print(f"📝 Format prompt exists: {bool(format_prompt)}")
+    if format_prompt:
+        print(f"📝 Format prompt preview: {format_prompt[:100]}...")
+    
+    # primary_formatter 확인
+    if hasattr(evaluator, 'primary_formatter'):
+        print(f"🔧 Primary formatter type: {type(evaluator.primary_formatter).__name__}")
+    
+    # 프롬프트 생성 테스트
+    base_prompt = "Context: This is a test context.\n\nQuestion: What is the test about?\n\nAnswer:"
+    formatted_prompt = evaluator.prepare_prompt_with_format(base_prompt, "cot")
+    
+    print(f"📄 Base prompt length: {len(base_prompt)}")
+    print(f"📄 Formatted prompt length: {len(formatted_prompt)}")
+    print(f"📄 Format instructions added: {len(formatted_prompt) > len(base_prompt)}")
+    
+    print("\n📝 Formatted prompt preview:")
+    print("-" * 40)
+    print(formatted_prompt[:300] + "..." if len(formatted_prompt) > 300 else formatted_prompt)
+    print("-" * 40)
+    
+    # XML 응답 파싱 테스트
+    test_response = """
+    <response>
+    <reasoning>
+    This is test reasoning for the question.
+    </reasoning>
+    <answer>
+    This is the test answer.
+    </answer>
+    </response>
+    """
+    
+    is_valid, parsed = evaluator.parse_response_with_format(test_response, "cot")
+    print(f"🔍 XML parsing successful: {is_valid}")
+    if is_valid and isinstance(parsed, dict):
+        print(f"🔍 Parsed reasoning: {parsed.get('reasoning', '')[:50]}...")
+        print(f"🔍 Parsed answer: {parsed.get('answer', '')[:50]}...")
+    
+    print("✅ Formatter functionality test completed!")
+    print("=" * 60)
+
+
 def main():
     """메인 실행 함수"""
     import argparse
@@ -864,8 +1048,14 @@ def main():
     parser.add_argument("--timestamp", type=str, help="Timestamp for continuing previous evaluation (format: YYYYMMDD_HHMMSS)")
     parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducible sampling")
     parser.add_argument("--benchmark", type=str, default="hotpotqa", help="Benchmark dataset name")
+    parser.add_argument("--test-formatter", action="store_true", help="Test formatter functionality only")
     
     args = parser.parse_args()
+    
+    # Formatter 테스트 모드
+    if args.test_formatter:
+        test_formatter_functionality()
+        return
     
     print(f"🧪 {args.benchmark.upper()} Evaluation with {args.max_samples} questions")
     if args.timestamp:

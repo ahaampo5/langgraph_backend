@@ -248,6 +248,7 @@ def create_reflexion_qa_agent(
 
 def create_io_qa_agent(
     model: str = "openai:gpt-4o-mini",
+    tools: Optional[List[BaseTool]] = [],
     benchmark: str = "hotpotqa",
     **kwargs
 ) -> CompiledGraph:
@@ -257,46 +258,52 @@ def create_io_qa_agent(
     
     Args:
         model: 사용할 언어 모델
+        tools: 추가 도구 리스트
         benchmark: QA 벤치마크 타입 (hotpotqa, squad, naturalqa 등)
         **kwargs: create_react_agent에 전달할 추가 인자
     
     Returns:
         CompiledGraph: 컴파일된 LangGraph 에이전트
     """
-    # IO 방식은 도구 없이 직접 답변
-    from langchain_core.language_models import BaseChatModel
-    from langgraph.graph import StateGraph, START, END
-    from langgraph.graph.message import add_messages
-    from typing_extensions import Annotated, TypedDict
-    from langchain_core.messages import BaseMessage
+    # # IO 방식은 도구 없이 직접 답변
+    # from langchain_core.language_models import BaseChatModel
+    # from langgraph.graph import StateGraph, START, END
+    # from langgraph.graph.message import add_messages
+    # from typing_extensions import Annotated, TypedDict
+    # from langchain_core.messages import BaseMessage
     
-    # 모델 로딩
-    if model.startswith("openai:"):
-        from langchain_openai import ChatOpenAI
-        model_name = model.replace("openai:", "")
-        llm = ChatOpenAI(model=model_name, temperature=0)
-    elif model.startswith("anthropic:"):
-        from langchain_anthropic import ChatAnthropic
-        model_name = model.replace("anthropic:", "")
-        llm = ChatAnthropic(model_name=model_name, temperature=0, timeout=60, stop=None)
-    else:
-        raise ValueError(f"Unsupported model: {model}")
+    # # 모델 로딩
+    # if model.startswith("openai:"):
+    #     from langchain_openai import ChatOpenAI
+    #     model_name = model.replace("openai:", "")
+    #     llm = ChatOpenAI(model=model_name, temperature=0)
+    # elif model.startswith("anthropic:"):
+    #     from langchain_anthropic import ChatAnthropic
+    #     model_name = model.replace("anthropic:", "")
+    #     llm = ChatAnthropic(model_name=model_name, temperature=0, timeout=60, stop=None)
+    # else:
+    #     raise ValueError(f"Unsupported model: {model}")
     
-    # 상태 정의
-    class State(TypedDict):
-        messages: Annotated[list[BaseMessage], add_messages]
+    # # 상태 정의
+    # class State(TypedDict):
+    #     messages: Annotated[list[BaseMessage], add_messages]
     
-    # 간단한 응답 노드
-    def respond(state: State):
-        return {"messages": [llm.invoke(state["messages"])]}
+    # # 간단한 응답 노드
+    # def respond(state: State):
+    #     return {"messages": [llm.invoke(state["messages"])]}
     
-    # 그래프 구성
-    workflow = StateGraph(State)
-    workflow.add_node("respond", respond)
-    workflow.add_edge(START, "respond")
-    workflow.add_edge("respond", END)
+    # # 그래프 구성
+    # workflow = StateGraph(State)
+    # workflow.add_node("respond", respond)
+    # workflow.add_edge(START, "respond")
+    # workflow.add_edge("respond", END)
     
-    return workflow.compile()
+    # return workflow.compile()
+    return create_react_agent(
+        model=model,
+        tools=tools,
+        **kwargs
+    )
 
 
 def create_qa_agent(

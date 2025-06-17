@@ -13,7 +13,7 @@ prompts:
       name: "HotpotQA with Chain of Thought"
       system_template: | # AFlow template for multi-hop reasoning
         Think step by step and solve the problem.
-        1. In the "thought" field, explain your thinking process in detail.
+        1. In the "reasoning" field, explain your thinking process in detail.
         2. In the "answer" field, provide the final answer concisely and clearly.
     react:
       name: "HotpotQA with ReAct"
@@ -1268,17 +1268,10 @@ format_usage:
 
 response_formats:
   hotpotqa:
+    format_type: "xml"
     format_prompt: |
       
       # Response format (must be strictly followed) (do not include any other formats except for the given XML format):
-      <response>
-      <reasoning>
-      [Your step-by-step reasoning process here - explain how you connect information across multiple sources to answer the multi-hop question]
-      </reasoning>
-      <answer>
-      [Final answer - should be a specific fact, name, number, or yes/no based on the question type]
-      </answer>
-      </response>
     
     example: |
       <response>
