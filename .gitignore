@@ -29,3 +29,9 @@ raw_data/
 
 # env
 .env
+
+# results
+results/
+
+# legacy
+legacy/

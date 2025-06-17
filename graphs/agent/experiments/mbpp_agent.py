@@ -1,81 +1,136 @@
-from typing import Annotated
-from pydantic import BaseModel
-from langgraph.prebuilt.chat_agent_executor import AgentState
-from langgraph.graph import StateGraph, START
-from langchain_core.runnables import RunnableConfig
-from langchain_core.messages import ToolMessage, AIMessage, AnyMessage
-from langgraph.prebuilt import create_react_agent
-
-class WeatherResponse(BaseModel):
-    conditions: str
-
-class MBPPAgent:
-    def __init__(self, model: str = "openai:gpt-4o-mini", user_name: str = "Alice"):
-        self.model = model
-        self.user_name = user_name
-        self.config = RunnableConfig(
-            configurable={
-                "user_name": self.user_name
-            }
-        )
-        self.graph = self._build_graph()
-    
-    def add_number(self, a: float, b: float) -> float:  
-        """Get Addition of two numbers."""
-        return a + b
-    
-    def _prompt(self, state: AgentState, config: RunnableConfig) -> list[AnyMessage]:
-        user_name = config["configurable"].get("user_name")
-        system_msg = """Please refer the given examples and generate a python function for my problem.
-Examples are listed as follows:
-{}
-
-Here is my problem:
-{}
 """
-        print([{"role": "system", "content": system_msg}] + state["messages"])
-        return [{"role": "system", "content": system_msg}] + state["messages"]
-    
-    def _build_graph(self):
-        agent = create_react_agent(
-            model=self.model,
-            tools=[],#self.add_number],
-            prompt=self._prompt
-        )
-        
-        graph_builder = StateGraph(AgentState)
-        graph_builder.add_node("agent", agent)
-        graph_builder.add_edge(START, "agent")
-        return graph_builder.compile()
-    
-    def stream_graph_updates(self, user_input: str):
-        for event in self.graph.stream(
-            {"messages": [{"role": "user", "content": user_input}]},
-            config=self.config
-        ):
-            for value in event.values():
-                if isinstance(value["messages"][-1], ToolMessage):
-                    print("Tool:", value["messages"][-1].tool_call.name)
-                    print("Tool Args:", value["messages"][-1].tool_call.args)
-                elif isinstance(value["messages"][-1], AIMessage):
-                    print("Assistant:", value["messages"][-1].content)
-    
-    def run_interactive(self):
-        while True:
-            try:
-                user_input = input("User: ")
-                if user_input.lower() in ["quit", "exit", "q"]:
-                    print("Goodbye!")
-                    break
-                self.stream_graph_updates(user_input)
-            except EOFError:
-                # fallback if input() is not available
-                user_input = "What do you know about LangGraph?"
-                print("User: " + user_input)
-                self.stream_graph_updates(user_input)
-                break
+MBPP (Mostly Basic Python Programming) 벤치마크용 에이전트
+LangGraph의 create_react_agent 기반으로 구현
+"""
 
-# 사용 예시
+from typing import List, Optional, Union
+from langchain_core.tools import BaseTool
+from langchain_core.language_models import LanguageModelLike
+from langgraph.types import Checkpointer
+from langgraph.checkpoint.memory import MemorySaver
+
+from code_benchmark_agents import (
+    create_benchmark_agent,
+    execute_python_code,
+    run_test_cases,
+    analyze_code_complexity
+)
+
+
+def create_mbpp_cot_agent(
+    model: Union[str, LanguageModelLike] = "gpt-4o-mini",
+    tools: Optional[List[BaseTool]] = None,
+    checkpointer: Optional[Checkpointer] = None,
+    **kwargs
+):
+    """MBPP 문제 해결용 Chain of Thought 에이전트"""
+    
+    if tools is None:
+        tools = [execute_python_code, run_test_cases, analyze_code_complexity]
+    
+    return create_benchmark_agent(
+        reasoning_type="cot",
+        model=model,
+        benchmark_type="mbpp",
+        tools=tools,
+        checkpointer=checkpointer,
+        **kwargs
+    )
+
+
+def create_mbpp_react_agent(
+    model: Union[str, LanguageModelLike] = "gpt-4o-mini",
+    tools: Optional[List[BaseTool]] = None,
+    checkpointer: Optional[Checkpointer] = None,
+    **kwargs
+):
+    """MBPP 문제 해결용 ReAct 에이전트"""
+    
+    if tools is None:
+        tools = [execute_python_code, run_test_cases, analyze_code_complexity]
+    
+    return create_benchmark_agent(
+        reasoning_type="react",
+        model=model,
+        benchmark_type="mbpp",
+        tools=tools,
+        checkpointer=checkpointer,
+        **kwargs
+    )
+
+
+def create_mbpp_reflexion_agent(
+    model: Union[str, LanguageModelLike] = "gpt-4o-mini",
+    tools: Optional[List[BaseTool]] = None,
+    checkpointer: Optional[Checkpointer] = None,
+    **kwargs
+):
+    """MBPP 문제 해결용 Reflexion 에이전트"""
+    
+    if tools is None:
+        tools = [execute_python_code, run_test_cases, analyze_code_complexity]
+    
+    return create_benchmark_agent(
+        reasoning_type="reflexion",
+        model=model,
+        benchmark_type="mbpp",
+        tools=tools,
+        checkpointer=checkpointer,
+        **kwargs
+    )
+
+
+# 예제 사용법
 if __name__ == "__main__":
-    math_agent = MBPPAgent()
-    math_agent.run_interactive()
+    # 메모리 체크포인터
+    memory = MemorySaver()
+    
+    # MBPP 문제 예제
+    mbpp_problem = """
+Write a function to find the similar elements from the given two tuple lists.
+
+Test cases:
+assert similar_elements((3, 4, 5, 6),(5, 7, 4, 10)) == (4, 5)
+assert similar_elements((1, 2, 3, 4),(5, 4, 3, 7)) == (3, 4) 
+assert similar_elements((11, 12, 14, 13),(17, 15, 14, 13)) == (13, 14)
+"""
+    
+    # CoT 에이전트로 문제 해결
+    print("MBPP CoT Agent 테스트")
+    cot_agent = create_mbpp_cot_agent(checkpointer=memory)
+    
+    config = {"configurable": {"thread_id": "mbpp_cot_test"}}
+    response = cot_agent.invoke({
+        "messages": [{"role": "user", "content": mbpp_problem}]
+    }, config=config)
+    
+    print("CoT 결과:")
+    print(response["messages"][-1].content)
+    
+    print("\n" + "="*50)
+    
+    # ReAct 에이전트로 문제 해결
+    print("MBPP ReAct Agent 테스트")
+    react_agent = create_mbpp_react_agent(checkpointer=memory)
+    
+    config = {"configurable": {"thread_id": "mbpp_react_test"}}
+    response = react_agent.invoke({
+        "messages": [{"role": "user", "content": mbpp_problem}]
+    }, config=config)
+    
+    print("ReAct 결과:")
+    print(response["messages"][-1].content)
+    
+    print("\n" + "="*50)
+    
+    # Reflexion 에이전트로 문제 해결
+    print("MBPP Reflexion Agent 테스트")
+    reflexion_agent = create_mbpp_reflexion_agent(checkpointer=memory)
+    
+    config = {"configurable": {"thread_id": "mbpp_reflexion_test"}}
+    response = reflexion_agent.invoke({
+        "messages": [{"role": "user", "content": mbpp_problem}]
+    }, config=config)
+    
+    print("Reflexion 결과:")
+    print(response["messages"][-1].content)

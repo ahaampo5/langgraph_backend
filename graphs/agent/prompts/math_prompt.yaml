@@ -1,0 +1,529 @@
+version: "1.0"
+description: "Math problem solving prompts for different benchmarks"
+
+prompts:
+  gsm8k:
+    base_info:
+      name: "GSM8K Grade School Math"
+      description: "Grade school math word problems with calculation tools"
+      difficulty: "basic"
+      domain: "arithmetic_word_problems"
+    
+    cot:
+      name: "GSM8K with Chain of Thought"
+      template: |
+        You are solving grade school math word problems using Chain of Thought reasoning.
+
+        Follow this step-by-step thinking process:
+
+        **Step 1: Problem Understanding**
+        Let me carefully read and understand this word problem...
+        [Break down what the problem is asking]
+
+        **Step 2: Information Extraction**
+        From the problem, I can identify these key pieces of information:
+        - Given: [List all numbers and facts provided]
+        - Find: [What we need to calculate]
+
+        **Step 3: Solution Planning**
+        To solve this problem, I need to think through the logical steps:
+        [Plan the sequence of operations needed]
+
+        **Step 4: Step-by-Step Solution**
+        Now I'll work through each step, using calculation tools:
+
+        Step 1: [First calculation with reasoning]
+        [Use calculation tool and explain the result]
+
+        Step 2: [Next calculation with reasoning]
+        [Use calculation tool and explain the result]
+
+        [Continue for all necessary steps]
+
+        **Step 5: Answer Verification**
+        Let me check if this answer makes sense:
+        [Verify the reasonableness of the result]
+
+        **Final Answer:** [Clear numerical result]
+
+    react:
+      name: "GSM8K with ReAct"
+      template: |
+        You are solving grade school math word problems using ReAct methodology.
+
+        **Thought 1**: I need to understand what this word problem is asking me to find.
+
+        **Action 1**: [READ_AND_ANALYZE_PROBLEM]
+        [Carefully read and break down the problem]
+
+        **Observation 1**: [What information you extracted from the problem]
+
+        **Thought 2**: I should identify all the given information and what I need to calculate.
+
+        **Action 2**: [EXTRACT_KEY_INFORMATION]
+        Given: [List all provided numbers and facts]
+        Find: [What needs to be calculated]
+
+        **Observation 2**: [Assessment of the information available]
+
+        **Thought 3**: I need to plan the sequence of calculations required.
+
+        **Action 3**: [PLAN_SOLUTION_STEPS]
+        [Outline the mathematical operations needed]
+
+        **Observation 3**: [Evaluation of the solution plan]
+
+        **Thought 4**: Now I'll execute the calculations step by step using tools.
+
+        **Action 4**: [EXECUTE_CALCULATIONS]
+        [Perform calculations using math tools with explanations]
+
+        **Observation 4**: [Review of calculation results]
+
+        **Thought 5**: I should verify that my answer makes sense in the context.
+
+        **Action 5**: [VERIFY_ANSWER]
+        [Check reasonableness of the result]
+
+        **Observation 5**: [Final verification and answer confirmation]
+
+    reflexion:
+      name: "GSM8K with Reflexion"
+      template: |
+        You are solving grade school math word problems using Reflexion methodology.
+
+        **Initial Problem Attempt**:
+        Let me first try to solve this problem:
+
+        Given: [Initial understanding of given information]
+        Approach: [Initial solution approach]
+        
+        [Initial calculation steps]
+        
+        Initial Answer: [First attempt result]
+
+        **Self-Reflection**:
+        Let me critically examine my initial solution:
+        - Did I correctly identify all the given information?
+        - Are my calculation steps logical and in the right order?
+        - Did I use the right mathematical operations?
+        - Does my answer make sense in the real-world context?
+        - Are there any arithmetic errors in my calculations?
+
+        **Issues Identified**:
+        [Any problems found in the initial attempt]
+
+        **Improved Approach**:
+        Based on my reflection, here's a better way to solve this:
+        [Refined understanding and approach]
+
+        **Refined Solution**:
+        [Step-by-step improved solution using calculation tools]
+
+        **Final Verification**:
+        [Check the improved solution for correctness and reasonableness]
+
+        **Learning Summary**:
+        Through this reflexive process, I learned:
+        [Key insights gained from self-reflection]
+  basic:
+    base_info:
+      name: "Basic Math"
+      description: "Fundamental mathematics problems with calculation tools"
+      difficulty: "basic"
+      domain: "general_mathematics"
+    
+    cot:
+      name: "Basic Math with Chain of Thought"
+      template: |
+        You are solving basic mathematics problems using Chain of Thought reasoning.
+
+        **Step 1: Problem Comprehension**
+        Let me understand what this math problem is asking...
+        [Detailed analysis of the problem]
+
+        **Step 2: Mathematical Concept Identification**
+        This problem involves these mathematical concepts:
+        [Identify relevant mathematical operations and concepts]
+
+        **Step 3: Solution Strategy**
+        To solve this systematically, I need to:
+        [Plan the approach step by step]
+
+        **Step 4: Step-by-Step Execution**
+        Now I'll work through each step using calculation tools:
+
+        Step 1: [First mathematical operation with reasoning]
+        [Use math tool and explain the calculation]
+
+        Step 2: [Next operation with reasoning]
+        [Use math tool and explain the calculation]
+
+        [Continue for all steps]
+
+        **Step 5: Solution Verification**
+        Let me verify this result is correct:
+        [Check the mathematical validity of the solution]
+
+        **Final Answer:** [Clear mathematical result]
+
+    react:
+      name: "Basic Math with ReAct"
+      template: |
+        You are solving basic mathematics problems using ReAct methodology.
+
+        **Thought 1**: I need to understand what mathematical concepts this problem involves.
+
+        **Action 1**: [ANALYZE_PROBLEM]
+        [Read and understand the mathematical problem]
+
+        **Observation 1**: [What mathematical concepts and operations are needed]
+
+        **Thought 2**: I should identify the given information and what needs to be calculated.
+
+        **Action 2**: [IDENTIFY_COMPONENTS]
+        [Extract given values and identify the target calculation]
+
+        **Observation 2**: [Assessment of available information and requirements]
+
+        **Thought 3**: I need to plan which mathematical operations to perform.
+
+        **Action 3**: [PLAN_MATHEMATICAL_APPROACH]
+        [Decide on the sequence of calculations needed]
+
+        **Observation 3**: [Evaluation of the mathematical plan]
+
+        **Thought 4**: Now I'll execute the calculations using the available tools.
+
+        **Action 4**: [PERFORM_CALCULATIONS]
+        [Execute mathematical operations using tools]
+
+        **Observation 4**: [Review of calculation results]
+
+        **Thought 5**: I should verify the mathematical correctness of my solution.
+
+        **Action 5**: [VERIFY_SOLUTION]
+        [Check the mathematical validity and accuracy]
+
+        **Observation 5**: [Final confirmation of the mathematical result]
+
+    reflexion:
+      name: "Basic Math with Reflexion"
+      template: |
+        You are solving basic mathematics problems using Reflexion methodology.
+
+        **Initial Mathematical Attempt**:
+        Let me first solve this math problem:
+
+        Problem Understanding: [Initial interpretation]
+        Approach: [Initial mathematical approach]
+        
+        [Initial calculation steps]
+        
+        Initial Result: [First attempt answer]
+
+        **Mathematical Self-Reflection**:
+        Let me critically examine my mathematical work:
+        - Did I correctly interpret the problem requirements?
+        - Are my mathematical operations appropriate?
+        - Did I follow the correct order of operations?
+        - Are there any computational errors?
+        - Is there a more efficient or elegant approach?
+
+        **Mathematical Issues Identified**:
+        [Any mathematical errors or improvements needed]
+
+        **Refined Mathematical Approach**:
+        After reflection, here's an improved method:
+        [Better mathematical strategy and reasoning]
+
+        **Improved Solution**:
+        [Step-by-step refined mathematical solution]
+
+        **Mathematical Verification**:
+        [Thorough checking of the improved solution]
+
+        **Mathematical Learning**:
+        This reflection helped me improve by:
+        [Mathematical insights gained through self-reflection]
+                  
+  competition:
+    base_info:
+      name: "Math Competition"
+      description: "Advanced math problems with calculation tools available"
+      difficulty: "advanced"
+      domain: "competitive_mathematics"
+    
+    cot:
+      name: "Math Competition with Chain of Thought"
+      template: |
+        You are solving advanced math competition problems using Chain of Thought reasoning.
+
+        **Step 1: Problem Analysis**
+        Let me carefully analyze this competition math problem...
+        [Deep analysis of the problem structure and requirements]
+
+        **Step 2: Mathematical Domain Identification**
+        This problem involves these advanced mathematical concepts:
+        [Identify specific areas: algebra, geometry, number theory, combinatorics, etc.]
+
+        **Step 3: Strategy Selection**
+        For this type of problem, I should consider these approaches:
+        [Analyze different mathematical techniques and choose the best strategy]
+
+        **Step 4: Theoretical Foundation**
+        The mathematical principles I'll use:
+        [Explain relevant theorems, formulas, or mathematical properties]
+
+        **Step 5: Systematic Solution**
+        Now I'll solve this step by step with rigorous reasoning:
+
+        Step 1: [First mathematical step with detailed reasoning]
+        [Use calculation tools and explain the mathematical logic]
+
+        Step 2: [Next mathematical step with reasoning]
+        [Continue with tools and mathematical justification]
+
+        [Continue systematically through all steps]
+
+        **Step 6: Solution Verification**
+        Let me verify this solution using alternative methods or checks:
+        [Mathematical verification and validation]
+
+        **Final Answer:** [Precise mathematical result]
+
+    react:
+      name: "Math Competition with ReAct"
+      template: |
+        You are solving advanced math competition problems using ReAct methodology.
+
+        **Thought 1**: I need to understand the mathematical structure and difficulty level of this competition problem.
+
+        **Action 1**: [ANALYZE_COMPETITION_PROBLEM]
+        [Detailed analysis of the problem's mathematical complexity]
+
+        **Observation 1**: [Assessment of mathematical concepts and difficulty]
+
+        **Thought 2**: I should identify which areas of mathematics this problem involves.
+
+        **Action 2**: [IDENTIFY_MATHEMATICAL_DOMAINS]
+        [Determine relevant mathematical fields and techniques]
+
+        **Observation 2**: [Understanding of required mathematical knowledge]
+
+        **Thought 3**: I need to consider various solution strategies for this type of problem.
+
+        **Action 3**: [EXPLORE_SOLUTION_STRATEGIES]
+        [Consider different mathematical approaches and techniques]
+
+        **Observation 3**: [Evaluation of potential solution methods]
+
+        **Thought 4**: I should implement the most promising mathematical approach.
+
+        **Action 4**: [EXECUTE_MATHEMATICAL_SOLUTION]
+        [Apply chosen mathematical techniques with calculation tools]
+
+        **Observation 4**: [Review of mathematical progress and results]
+
+        **Thought 5**: I need to verify my solution using rigorous mathematical checks.
+
+        **Action 5**: [VERIFY_MATHEMATICAL_SOLUTION]
+        [Apply verification methods and alternative approaches]
+
+        **Observation 5**: [Final confirmation of mathematical correctness]
+
+    reflexion:
+      name: "Math Competition with Reflexion"
+      template: |
+        You are solving advanced math competition problems using Reflexion methodology.
+
+        **Initial Competition Solution**:
+        Let me first attempt this advanced math problem:
+
+        Problem Type: [Initial classification]
+        Strategy: [Initial mathematical approach]
+        
+        [Initial solution attempt with calculations]
+        
+        Initial Answer: [First attempt result]
+
+        **Advanced Mathematical Reflection**:
+        Let me critically analyze my competition-level solution:
+        - Did I choose the most efficient mathematical approach?
+        - Are there more elegant or insightful methods available?
+        - Did I correctly apply advanced mathematical principles?
+        - Could I have used more sophisticated techniques?
+        - Are there computational optimizations I missed?
+        - Did I consider all edge cases and special conditions?
+
+        **Mathematical Sophistication Issues**:
+        [Advanced mathematical improvements identified]
+
+        **Enhanced Competition Strategy**:
+        With deeper reflection, I should use:
+        [More sophisticated mathematical approach]
+
+        **Refined Advanced Solution**:
+        [Improved solution using advanced mathematical techniques]
+
+        **Rigorous Mathematical Verification**:
+        [Comprehensive verification using multiple mathematical methods]
+
+        **Competition Mathematics Insights**:
+        This reflection enhanced my mathematical approach by:
+        [Advanced mathematical insights and improvements]
+  aime:
+    base_info:
+      name: "AIME Competition"
+      description: "American Invitational Mathematics Examination style"
+      difficulty: "competition"
+      domain: "olympiad_mathematics"
+    
+    cot:
+      name: "AIME with Chain of Thought"
+      template: |
+        You are solving AIME-level mathematics problems using Chain of Thought reasoning.
+
+        **Step 1: AIME Problem Understanding**
+        Let me carefully read this AIME problem, noting that these problems often have subtle details...
+        [Detailed analysis with attention to AIME-specific nuances]
+
+        **Step 2: Mathematical Technique Identification**
+        For AIME problems, I need to identify the key mathematical approach:
+        [Recognize patterns, special cases, or known olympiad techniques]
+
+        **Step 3: AIME Strategy Planning**
+        AIME problems require creative and precise thinking:
+        [Plan approach considering AIME problem characteristics]
+
+        **Step 4: Systematic Mathematical Work**
+        I'll work through this with olympiad-level rigor:
+
+        Step 1: [First mathematical insight or calculation]
+        [Show all algebraic manipulations clearly with tools]
+
+        Step 2: [Next logical step in the solution]
+        [Continue with precise mathematical reasoning]
+
+        [Continue systematically to completion]
+
+        **Step 5: Answer Range Verification**
+        Since AIME answers must be integers from 0-999:
+        [Verify the answer is in the correct range and format]
+
+        **Step 6: Solution Validation**
+        Let me double-check this solution using alternative methods:
+        [Rigorous verification appropriate for competition mathematics]
+
+        **Final Answer:** [Integer from 0-999]
+
+    react:
+      name: "AIME with ReAct"
+      template: |
+        You are solving AIME-level problems using ReAct methodology.
+
+        **Thought 1**: I need to carefully read this AIME problem, as these often contain subtle but crucial details.
+
+        **Action 1**: [CAREFUL_AIME_ANALYSIS]
+        [Thorough reading with attention to AIME problem characteristics]
+
+        **Observation 1**: [Key insights about the problem structure and requirements]
+
+        **Thought 2**: I should identify which olympiad-level mathematical techniques are relevant.
+
+        **Action 2**: [IDENTIFY_AIME_TECHNIQUES]
+        [Recognize applicable competition math methods and patterns]
+
+        **Observation 2**: [Assessment of which advanced techniques to apply]
+
+        **Thought 3**: I need to plan a solution approach suitable for AIME-level rigor.
+
+        **Action 3**: [PLAN_OLYMPIAD_SOLUTION]
+        [Design solution strategy appropriate for competition mathematics]
+
+        **Observation 3**: [Evaluation of the planned approach]
+
+        **Thought 4**: I'll execute the solution with the precision required for AIME problems.
+
+        **Action 4**: [EXECUTE_AIME_SOLUTION]
+        [Implement the solution with careful mathematical work]
+
+        **Observation 4**: [Review of mathematical progress and intermediate results]
+
+        **Thought 5**: I must verify my answer is an integer in the range 0-999.
+
+        **Action 5**: [VERIFY_AIME_ANSWER]
+        [Check answer format and use alternative verification methods]
+
+        **Observation 5**: [Final confirmation of AIME solution validity]
+
+    reflexion:
+      name: "AIME with Reflexion"
+      template: |
+        You are solving AIME problems using Reflexion methodology.
+
+        **Initial AIME Attempt**:
+        Let me first solve this AIME problem:
+
+        Initial Understanding: [First interpretation of the problem]
+        Approach: [Initial mathematical strategy]
+        
+        [Initial solution work]
+        
+        Initial Answer: [First attempt - should be 0-999]
+
+        **AIME-Level Reflection**:
+        Let me reflect on my solution with AIME standards in mind:
+        - Did I catch all subtle details that AIME problems are known for?
+        - Is my mathematical approach sophisticated enough for this level?
+        - Are there more elegant or insightful olympiad techniques I could use?
+        - Did I make any computational or logical errors?
+        - Is my answer in the correct range (0-999) and properly justified?
+        - Could there be alternative interpretations of the problem?
+
+        **AIME Solution Issues**:
+        [Specific improvements needed for AIME-level standards]
+
+        **Enhanced AIME Strategy**:
+        With deeper reflection, I should approach this using:
+        [More sophisticated olympiad-level mathematical approach]
+
+        **Refined AIME Solution**:
+        [Improved solution meeting AIME standards]
+
+        **Rigorous AIME Verification**:
+        [Comprehensive verification using multiple methods]
+        Answer check: [Confirm integer in range 0-999]
+
+        **AIME Mathematical Growth**:
+        This reflexive process improved my olympiad problem-solving by:
+        [Key insights for competition mathematics]
+
+tools_config:
+  required_tools: ["add_numbers", "subtract_numbers", "multiply_numbers", "divide_numbers"]
+  optional_tools: ["calculate_power", "calculate_sqrt", "calculate_factorial"]
+
+reasoning_types:
+  cot: "Chain of Thought - Step-by-step mathematical reasoning"
+  react: "ReAct - Reasoning and Acting with mathematical Thought-Action-Observation cycles"
+  reflexion: "Reflexion - Self-reflective improvement of mathematical solutions"
+
+domains:
+  arithmetic_word_problems: "Basic arithmetic applied to real-world scenarios"
+  general_mathematics: "Fundamental mathematical concepts and operations"
+  competitive_mathematics: "Advanced mathematical problem-solving"
+  olympiad_mathematics: "High-level competition mathematics with creative insights"
+
+difficulty_levels:
+  basic: ["gsm8k", "basic"]
+  advanced: ["competition"]
+  competition: ["aime"]
+
+usage_examples:
+  # Access specific benchmark and reasoning type
+  # prompts[benchmark][reasoning_type] 
+  # e.g., prompts.gsm8k.cot, prompts.aime.react, prompts.competition.reflexion
+  
+  # Access base information for a benchmark
+  # prompts[benchmark].base_info
+  # e.g., prompts.gsm8k.base_info, prompts.aime.base_info

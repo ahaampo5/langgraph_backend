@@ -1,0 +1,1331 @@
+version: "1.0"
+description: "Question Answering prompts for different QA benchmarks and reasoning tasks"
+
+prompts:
+  hotpotqa:
+    base_info:
+      name: "HotpotQA Multi-hop Reasoning"
+      description: "Multi-hop reasoning over multiple documents"
+      difficulty: "advanced"
+      reasoning_type: "multi-hop"
+    
+    cot:
+      name: "HotpotQA with Chain of Thought"
+      template: |
+        You are answering complex multi-hop questions using Chain of Thought reasoning.
+
+        **Step 1: Question Decomposition**
+        Let me break down this complex question into smaller, manageable parts...
+        [Analyze what the question is asking and identify sub-questions]
+
+        **Step 2: Information Requirements Analysis**
+        To answer this question, I need to find the following information:
+        [List specific pieces of information needed for each part]
+
+        **Step 3: Multi-hop Reasoning Chain**
+        I'll work through this step by step, connecting information across sources:
+
+        Hop 1: [First piece of information to find]
+        - Source: [Where this information comes from]
+        - Finding: [What I discovered]
+
+        Hop 2: [How this connects to the next piece of information]
+        - Connection: [How the first finding leads to the second question]
+        - Source: [Where the second information comes from]
+        - Finding: [What I discovered in the second hop]
+
+        Hop 3: [Continue the reasoning chain as needed]
+        - Connection: [How previous findings lead to this step]
+        - Source: [Information source]
+        - Finding: [Discovery]
+
+        **Step 4: Evidence Integration**
+        Now I'll combine all the evidence I've gathered:
+        [Show how all pieces of information work together]
+
+        **Step 5: Answer Synthesis**
+        Based on my multi-hop reasoning chain:
+        [Provide the final answer with clear reasoning]
+
+        **Step 6: Evidence Verification**
+        Let me verify my answer by checking the supporting evidence:
+        [List key evidence that supports the final answer]
+
+    react:
+      name: "HotpotQA with ReAct"
+      template: |
+        You are answering multi-hop questions using ReAct methodology.
+
+        **Thought 1**: I need to understand what this complex question is asking and what type of multi-hop reasoning is required.
+
+        **Action 1**: [ANALYZE_COMPLEX_QUESTION]
+        [Break down the question and identify the reasoning structure needed]
+
+        **Observation 1**: [What you learned about the question structure and requirements]
+
+        **Thought 2**: I should identify what specific information I need to find in the first hop.
+
+        **Action 2**: [IDENTIFY_FIRST_HOP_REQUIREMENTS]
+        [Determine what information to search for first]
+
+        **Observation 2**: [Assessment of first information need]
+
+        **Thought 3**: Let me search for and analyze the first piece of information.
+
+        **Action 3**: [EXECUTE_FIRST_HOP]
+        [Search for and extract first piece of information]
+
+        **Observation 3**: [What I found in the first hop]
+
+        **Thought 4**: Now I need to use this finding to determine what to look for in the second hop.
+
+        **Action 4**: [PLAN_SECOND_HOP]
+        [Use first hop results to plan second information search]
+
+        **Observation 4**: [How the first hop informs the second hop]
+
+        **Thought 5**: Let me execute the second hop of reasoning.
+
+        **Action 5**: [EXECUTE_SECOND_HOP]
+        [Search for and analyze second piece of information]
+
+        **Observation 5**: [Results from second hop]
+
+        **Thought 6**: I should continue this process until I have all necessary information.
+
+        **Action 6**: [CONTINUE_REASONING_CHAIN]
+        [Execute additional hops as needed]
+
+        **Observation 6**: [Complete information gathered]
+
+        **Thought 7**: Now I can synthesize all the information to answer the original question.
+
+        **Action 7**: [SYNTHESIZE_MULTI_HOP_ANSWER]
+        [Combine all findings into a coherent answer]
+
+        **Observation 7**: [Final answer with supporting evidence chain]
+
+    reflexion:
+      name: "HotpotQA with Reflexion"
+      template: |
+        You are answering multi-hop questions using Reflexion methodology.
+
+        **Initial Multi-hop Attempt**:
+        Let me first try to answer this complex question:
+
+        Question Analysis: [Initial understanding of the question]
+        Reasoning Chain: [Initial multi-hop reasoning attempt]
+        
+        First Hop: [Initial first information search]
+        Second Hop: [Initial second information search]
+        [Additional hops as attempted]
+        
+        Initial Answer: [First attempt at the answer]
+
+        **Multi-hop Reasoning Reflection**:
+        Let me critically examine my multi-hop reasoning process:
+        - Did I correctly identify all the necessary reasoning hops?
+        - Are my connections between different pieces of information logical?
+        - Did I miss any crucial information sources?
+        - Are there alternative reasoning paths I should consider?
+        - Did I properly verify the reliability of my information sources?
+        - Could there be ambiguities in how I interpreted the connections?
+
+        **Multi-hop Issues Identified**:
+        [Specific problems with the initial reasoning chain]
+
+        **Improved Multi-hop Strategy**:
+        After reflection, here's a better approach to the multi-hop reasoning:
+        [Enhanced reasoning strategy with improved hop sequence]
+
+        **Refined Multi-hop Solution**:
+        [Improved step-by-step multi-hop reasoning with better connections]
+
+        **Evidence Chain Verification**:
+        [Thorough verification of the complete reasoning chain]
+
+        **Multi-hop Learning Summary**:
+        Through this reflexive process, I improved my multi-hop reasoning by:
+        [Key insights about complex reasoning and information integration]
+
+  squad:
+    base_info:
+      name: "SQuAD Reading Comprehension"
+      description: "Stanford Question Answering Dataset - extractive QA"
+      difficulty: "intermediate"
+      reasoning_type: "extractive"
+    
+    cot:
+      name: "SQuAD with Chain of Thought"
+      template: |
+        You are answering reading comprehension questions using Chain of Thought reasoning.
+
+        **Step 1: Passage Comprehension**
+        Let me carefully read and understand the given passage...
+        [Detailed analysis of passage content and structure]
+
+        **Step 2: Question Analysis**
+        Now I need to understand exactly what the question is asking:
+        [Break down the question and identify what type of information is needed]
+
+        **Step 3: Information Location Strategy**
+        I'll systematically search the passage for relevant information:
+        [Plan how to locate the answer within the passage]
+
+        **Step 4: Evidence Identification**
+        Let me find the specific parts of the passage that relate to the question:
+        [Identify and quote relevant sentences or phrases]
+
+        **Step 5: Answer Extraction Process**
+        Based on the evidence I found, I can extract the answer:
+        [Show how the answer is derived from the passage text]
+
+        **Step 6: Answer Verification**
+        Let me verify that my answer directly addresses the question:
+        [Check that the answer is complete and accurate]
+
+        **Final Answer:** [Clear answer based on passage evidence]
+        **Supporting Text:** [Specific passage text that supports the answer]
+
+    react:
+      name: "SQuAD with ReAct"
+      template: |
+        You are answering reading comprehension questions using ReAct methodology.
+
+        **Thought 1**: I need to carefully read this passage to understand its content before answering the question.
+
+        **Action 1**: [READ_PASSAGE_THOROUGHLY]
+        [Comprehensive reading and understanding of the passage]
+
+        **Observation 1**: [Key information and themes from the passage]
+
+        **Thought 2**: Now I should analyze what the question is specifically asking for.
+
+        **Action 2**: [ANALYZE_QUESTION_REQUIREMENTS]
+        [Determine what type of information the question seeks]
+
+        **Observation 2**: [Understanding of question focus and requirements]
+
+        **Thought 3**: I need to locate the relevant information in the passage.
+
+        **Action 3**: [SEARCH_PASSAGE_FOR_EVIDENCE]
+        [Systematically search for relevant information]
+
+        **Observation 3**: [Relevant passages and information found]
+
+        **Thought 4**: I should extract the specific answer from the identified evidence.
+
+        **Action 4**: [EXTRACT_ANSWER]
+        [Pull out the specific answer from the passage text]
+
+        **Observation 4**: [The extracted answer and its source]
+
+        **Thought 5**: I need to verify that this answer fully addresses the question.
+
+        **Action 5**: [VERIFY_ANSWER_COMPLETENESS]
+        [Check answer against question requirements]
+
+        **Observation 5**: [Confirmation of answer accuracy and completeness]
+
+    reflexion:
+      name: "SQuAD with Reflexion"
+      template: |
+        You are answering reading comprehension questions using Reflexion methodology.
+
+        **Initial Reading Comprehension Attempt**:
+        Let me first try to answer this question:
+
+        Passage Understanding: [Initial reading of the passage]
+        Question Focus: [Initial interpretation of what's being asked]
+        
+        Evidence Found: [Initial evidence location]
+        Initial Answer: [First attempt at the answer]
+
+        **Reading Comprehension Reflection**:
+        Let me critically examine my reading comprehension process:
+        - Did I fully understand all parts of the passage?
+        - Am I interpreting the question correctly?
+        - Did I find the most relevant evidence?
+        - Is my answer complete and directly responsive?
+        - Could there be other interpretations of the question?
+        - Did I miss any important context clues?
+
+        **Reading Issues Identified**:
+        [Specific problems with initial comprehension or answer]
+
+        **Improved Reading Strategy**:
+        After reflection, here's a better approach:
+        [Enhanced reading comprehension and answer extraction method]
+
+        **Refined Answer**:
+        [Improved answer based on better passage analysis]
+
+        **Evidence Verification**:
+        [Thorough verification of answer against passage content]
+
+        **Reading Comprehension Learning**:
+        This reflection improved my understanding by:
+        [Key insights about careful reading and answer extraction]
+
+  naturalqa:
+    base_info:
+      name: "Natural Questions"
+      description: "Real user questions from Google search queries"
+      difficulty: "intermediate"
+      reasoning_type: "open-domain"
+    
+    cot:
+      name: "Natural Questions with Chain of Thought"
+      template: |
+        You are answering natural questions using Chain of Thought reasoning.
+
+        **Step 1: Question Intent Understanding**
+        Let me understand what this person is really asking...
+        [Analyze the user's intent and what they want to know]
+
+        **Step 2: Context Interpretation**
+        I need to consider the implicit context and assumptions:
+        [Identify any unstated context or background assumptions]
+
+        **Step 3: Knowledge Domain Identification**
+        This question requires knowledge from these areas:
+        [Identify relevant knowledge domains needed]
+
+        **Step 4: Information Retrieval Process**
+        Let me systematically gather the relevant information:
+        [Think through what factual knowledge is needed]
+
+        **Step 5: Answer Construction**
+        Based on my knowledge, I can construct this answer:
+        [Build the answer step by step with reasoning]
+
+        **Step 6: Completeness Check**
+        Let me ensure my answer fully addresses what the user wanted to know:
+        [Verify the answer meets the user's needs]
+
+        **Step 7: Clarity and Helpfulness Assessment**
+        Is my answer clear and helpful for a real user?
+        [Ensure the answer is practical and understandable]
+
+        **Final Answer:** [Comprehensive, helpful response]
+
+    react:
+      name: "Natural Questions with ReAct"
+      template: |
+        You are answering natural questions using ReAct methodology.
+
+        **Thought 1**: I need to understand what this person is actually trying to find out.
+
+        **Action 1**: [ANALYZE_USER_INTENT]
+        [Determine the real intent behind the natural question]
+
+        **Observation 1**: [Understanding of what the user wants to know]
+
+        **Thought 2**: I should consider any implicit context or assumptions in the question.
+
+        **Action 2**: [IDENTIFY_IMPLICIT_CONTEXT]
+        [Look for unstated assumptions or background context]
+
+        **Observation 2**: [Contextual understanding and assumptions identified]
+
+        **Thought 3**: I need to identify what knowledge domains are relevant to this question.
+
+        **Action 3**: [DETERMINE_KNOWLEDGE_DOMAINS]
+        [Identify areas of knowledge needed to answer]
+
+        **Observation 3**: [Relevant knowledge areas identified]
+
+        **Thought 4**: I should gather the factual information needed to answer comprehensively.
+
+        **Action 4**: [RETRIEVE_RELEVANT_KNOWLEDGE]
+        [Access and organize relevant factual information]
+
+        **Observation 4**: [Key facts and information gathered]
+
+        **Thought 5**: I need to construct a helpful, complete answer for the user.
+
+        **Action 5**: [CONSTRUCT_HELPFUL_ANSWER]
+        [Build a comprehensive response that addresses the user's needs]
+
+        **Observation 5**: [Assessment of answer quality and completeness]
+
+        **Thought 6**: I should ensure my answer is clear and practically useful.
+
+        **Action 6**: [VERIFY_CLARITY_AND_USEFULNESS]
+        [Check that the answer is clear and helpful for a real user]
+
+        **Observation 6**: [Final confirmation of answer quality]
+
+    reflexion:
+      name: "Natural Questions with Reflexion"
+      template: |
+        You are answering natural questions using Reflexion methodology.
+
+        **Initial Natural Question Response**:
+        Let me first answer this natural question:
+
+        Question Intent: [Initial understanding of what user wants]
+        Knowledge Applied: [Initial knowledge used]
+        
+        Initial Answer: [First response to the question]
+
+        **Natural Question Reflection**:
+        Let me reflect on my response to this natural question:
+        - Did I correctly understand what the user really wanted to know?
+        - Is my answer practical and useful for a real person?
+        - Did I include enough context and explanation?
+        - Are there common follow-up questions I should address?
+        - Is my answer at the right level of detail?
+        - Did I consider different possible interpretations of the question?
+
+        **Response Issues Identified**:
+        [Problems with the initial response approach]
+
+        **Improved User-Focused Strategy**:
+        To better serve the user, I should:
+        [Enhanced approach focused on user needs and clarity]
+
+        **Refined Natural Answer**:
+        [Improved response that better addresses real user needs]
+
+        **User Experience Verification**:
+        [Check that the answer truly helps a real person]
+
+        **Natural QA Learning**:
+        This reflection improved my user-focused answering by:
+        [Insights about serving real user information needs]
+
+  msmarco:
+    base_info:
+      name: "MS MARCO QA"
+      description: "Microsoft Machine Reading Comprehension dataset"
+      difficulty: "intermediate"
+      reasoning_type: "passage-based"
+    
+    cot:
+      name: "MS MARCO with Chain of Thought"
+      template: |
+        You are answering questions using web search passages with Chain of Thought reasoning.
+
+        **Step 1: Question Analysis**
+        Let me understand what information this question is seeking...
+        [Analyze the question and determine what type of answer is needed]
+
+        **Step 2: Passage Evaluation**
+        I need to systematically examine each provided passage:
+        [Plan how to review and assess multiple passages]
+
+        **Step 3: Relevance Assessment**
+        For each passage, I'll determine its relevance:
+        
+        Passage 1: [Assess relevance and key information]
+        Passage 2: [Assess relevance and key information]
+        [Continue for all passages]
+
+        **Step 4: Evidence Extraction**
+        From the most relevant passages, I can extract:
+        [Pull out specific facts and information that answer the question]
+
+        **Step 5: Information Synthesis**
+        Now I'll combine information from multiple passages if needed:
+        [Show how different passages complement each other]
+
+        **Step 6: Answer Construction**
+        Based on the evidence from the passages:
+        [Build a comprehensive answer using passage information]
+
+        **Step 7: Source Attribution**
+        My answer is supported by these passages:
+        [Identify which passages provided the key information]
+
+        **Final Answer:** [Response based entirely on passage evidence]
+
+    react:
+      name: "MS MARCO with ReAct"
+      template: |
+        You are answering questions using web passages with ReAct methodology.
+
+        **Thought 1**: I need to understand what this question is asking and what type of information would answer it.
+
+        **Action 1**: [ANALYZE_QUESTION_REQUIREMENTS]
+        [Determine what the question seeks and what would constitute a good answer]
+
+        **Observation 1**: [Understanding of question focus and answer requirements]
+
+        **Thought 2**: I should examine all the provided passages to see which ones contain relevant information.
+
+        **Action 2**: [REVIEW_ALL_PASSAGES]
+        [Systematically go through each passage for relevance]
+
+        **Observation 2**: [Assessment of which passages are most relevant]
+
+        **Thought 3**: I need to extract specific information from the most relevant passages.
+
+        **Action 3**: [EXTRACT_PASSAGE_EVIDENCE]
+        [Pull out specific facts and details that answer the question]
+
+        **Observation 3**: [Key evidence found in the passages]
+
+        **Thought 4**: I should check if I need to combine information from multiple passages.
+
+        **Action 4**: [SYNTHESIZE_MULTI_PASSAGE_INFORMATION]
+        [Combine relevant information from different passages if needed]
+
+        **Observation 4**: [How information from different passages works together]
+
+        **Thought 5**: I can now construct a comprehensive answer based on the passage evidence.
+
+        **Action 5**: [CONSTRUCT_EVIDENCE_BASED_ANSWER]
+        [Build answer using only information from the passages]
+
+        **Observation 5**: [Complete answer with clear passage attribution]
+
+    reflexion:
+      name: "MS MARCO with Reflexion"
+      template: |
+        You are answering questions using web passages with Reflexion methodology.
+
+        **Initial Passage-Based Response**:
+        Let me first answer using the provided passages:
+
+        Question Focus: [Initial understanding of the question]
+        Relevant Passages: [Initial assessment of useful passages]
+        
+        Evidence Used: [Initial evidence extraction]
+        Initial Answer: [First answer attempt]
+
+        **Passage-Based Reasoning Reflection**:
+        Let me reflect on my use of the passage evidence:
+        - Did I thoroughly examine all provided passages?
+        - Am I using the most relevant and reliable information?
+        - Did I properly synthesize information from multiple passages?
+        - Is my answer well-supported by the passage evidence?
+        - Did I miss any important details in the passages?
+        - Am I staying within the bounds of what the passages actually say?
+
+        **Evidence Issues Identified**:
+        [Problems with initial evidence selection or usage]
+
+        **Improved Evidence Strategy**:
+        After reflection, I should better utilize the passages by:
+        [Enhanced approach to passage analysis and evidence extraction]
+
+        **Refined Passage-Based Answer**:
+        [Improved answer with better evidence utilization]
+
+        **Evidence Verification**:
+        [Thorough checking of answer against passage content]
+
+        **Passage Analysis Learning**:
+        This reflection improved my passage-based reasoning by:
+        [Key insights about effectively using provided evidence]
+
+  commonsenseqa:
+    base_info:
+      name: "CommonsenseQA"
+      description: "Multiple-choice questions requiring commonsense reasoning"
+      difficulty: "intermediate"
+      reasoning_type: "commonsense"
+    
+    cot:
+      name: "CommonsenseQA with Chain of Thought"
+      template: |
+        You are answering commonsense questions using Chain of Thought reasoning.
+
+        **Step 1: Question Understanding**
+        Let me understand what this question is testing about commonsense...
+        [Analyze what aspect of common knowledge is being tested]
+
+        **Step 2: Answer Choice Analysis**
+        I'll examine each option systematically:
+
+        Option A: [Detailed analysis of why this might or might not be correct]
+        Option B: [Detailed analysis of why this might or might not be correct]
+        Option C: [Detailed analysis of why this might or might not be correct]
+        Option D: [Detailed analysis of why this might or might not be correct]
+        Option E: [If present, detailed analysis]
+
+        **Step 3: Commonsense Knowledge Application**
+        Based on how the world typically works:
+        [Apply everyday knowledge and experience to evaluate options]
+
+        **Step 4: Logical Elimination Process**
+        I can eliminate options that don't make sense:
+        [Show reasoning for eliminating obviously incorrect options]
+
+        **Step 5: Best Answer Selection**
+        Comparing the remaining viable options:
+        [Compare remaining options and select the most reasonable one]
+
+        **Step 6: Answer Justification**
+        The best answer is [X] because:
+        [Provide clear commonsense reasoning for the choice]
+
+        **Final Answer:** [Selected option with brief justification]
+
+    react:
+      name: "CommonsenseQA with ReAct"
+      template: |
+        You are answering commonsense questions using ReAct methodology.
+
+        **Thought 1**: I need to understand what aspect of commonsense this question is testing.
+
+        **Action 1**: [ANALYZE_COMMONSENSE_QUESTION]
+        [Determine what kind of everyday knowledge is needed]
+
+        **Observation 1**: [Understanding of the commonsense domain being tested]
+
+        **Thought 2**: I should examine each answer choice to understand the options.
+
+        **Action 2**: [EXAMINE_ALL_OPTIONS]
+        [Look at each multiple choice option systematically]
+
+        **Observation 2**: [Overview of all available answer choices]
+
+        **Thought 3**: I need to apply my commonsense knowledge to evaluate each option.
+
+        **Action 3**: [APPLY_COMMONSENSE_TO_OPTIONS]
+        [Use everyday knowledge to assess each choice]
+
+        **Observation 3**: [How commonsense knowledge applies to each option]
+
+        **Thought 4**: I should eliminate options that clearly don't make sense.
+
+        **Action 4**: [ELIMINATE_UNREASONABLE_OPTIONS]
+        [Remove obviously incorrect choices based on common sense]
+
+        **Observation 4**: [Which options remain after elimination]
+
+        **Thought 5**: Among the remaining options, I need to select the most reasonable one.
+
+        **Action 5**: [SELECT_BEST_COMMONSENSE_ANSWER]
+        [Choose the option that best fits common knowledge]
+
+        **Observation 5**: [Final answer with commonsense justification]
+
+    reflexion:
+      name: "CommonsenseQA with Reflexion"
+      template: |
+        You are answering commonsense questions using Reflexion methodology.
+
+        **Initial Commonsense Response**:
+        Let me first answer this commonsense question:
+
+        Question Analysis: [Initial understanding of what's being tested]
+        Option Evaluation: [Initial assessment of choices]
+        
+        Commonsense Applied: [Initial commonsense reasoning]
+        Initial Answer: [First choice selection]
+
+        **Commonsense Reasoning Reflection**:
+        Let me reflect on my commonsense reasoning:
+        - Did I consider all relevant everyday knowledge?
+        - Are there cultural or contextual assumptions I should question?
+        - Did I think through the real-world implications of each option?
+        - Could there be edge cases or exceptions I didn't consider?
+        - Am I applying the most relevant commonsense principles?
+        - Did I consider different perspectives people might have?
+
+        **Commonsense Issues Identified**:
+        [Problems with initial commonsense application]
+
+        **Improved Commonsense Strategy**:
+        After reflection, I should apply commonsense more carefully by:
+        [Enhanced approach to everyday knowledge application]
+
+        **Refined Commonsense Answer**:
+        [Improved answer with better commonsense reasoning]
+
+        **Commonsense Verification**:
+        [Double-check that the answer truly reflects common sense]
+
+        **Commonsense Learning**:
+        This reflection improved my commonsense reasoning by:
+        [Insights about applying everyday knowledge more effectively]
+
+  drop:
+    base_info:
+      name: "DROP Reading Comprehension"
+      description: "Discrete Reasoning Over Paragraphs - numerical and discrete reasoning"
+      difficulty: "advanced"
+      reasoning_type: "numerical"
+    
+    cot:
+      name: "DROP with Chain of Thought"
+      template: |
+        You are solving reading comprehension questions requiring numerical reasoning using Chain of Thought.
+
+        **Step 1: Passage Analysis**
+        Let me carefully read and understand the passage content...
+        [Thorough analysis of the passage, focusing on numerical information]
+
+        **Step 2: Question Type Identification**
+        This question requires me to:
+        [Identify whether it's counting, arithmetic, comparison, date calculation, etc.]
+
+        **Step 3: Relevant Information Extraction**
+        From the passage, I need these key pieces of information:
+        [Extract all relevant numbers, dates, names, or facts needed]
+
+        **Step 4: Reasoning Process Planning**
+        To solve this, I need to follow these logical steps:
+        [Plan the sequence of operations or logical reasoning needed]
+
+        **Step 5: Step-by-Step Calculation/Reasoning**
+        Now I'll work through each step:
+
+        Step 1: [First calculation or logical step with explanation]
+        Step 2: [Next calculation or reasoning step]
+        [Continue for all necessary steps]
+
+        **Step 6: Result Verification**
+        Let me verify my answer makes sense:
+        [Check the reasonableness of the result against the passage]
+
+        **Step 7: Unit and Format Check**
+        Ensure my answer is in the correct format:
+        [Verify units, format, and completeness]
+
+        **Final Answer:** [Result with appropriate units or format]
+
+    react:
+      name: "DROP with ReAct"
+      template: |
+        You are solving numerical reading comprehension using ReAct methodology.
+
+        **Thought 1**: I need to understand the passage content and identify numerical information.
+
+        **Action 1**: [ANALYZE_PASSAGE_FOR_NUMERICAL_INFO]
+        [Read passage focusing on numbers, dates, quantities, and relationships]
+
+        **Observation 1**: [Key numerical information and relationships identified]
+
+        **Thought 2**: I should determine what type of numerical reasoning this question requires.
+
+        **Action 2**: [CLASSIFY_REASONING_TYPE]
+        [Determine if it's arithmetic, counting, comparison, temporal reasoning, etc.]
+
+        **Observation 2**: [Type of numerical reasoning needed]
+
+        **Thought 3**: I need to extract all relevant information required for the calculation.
+
+        **Action 3**: [EXTRACT_RELEVANT_DATA]
+        [Pull out specific numbers, dates, names, or facts needed]
+
+        **Observation 3**: [All necessary data for the calculation]
+
+        **Thought 4**: I should plan the sequence of operations needed to solve this.
+
+        **Action 4**: [PLAN_CALCULATION_STEPS]
+        [Design the logical sequence of calculations or reasoning]
+
+        **Observation 4**: [Step-by-step plan for solving]
+
+        **Thought 5**: Now I'll execute the calculations step by step.
+
+        **Action 5**: [EXECUTE_NUMERICAL_REASONING]
+        [Perform calculations and logical operations]
+
+        **Observation 5**: [Results of calculations and reasoning]
+
+        **Thought 6**: I should verify my answer and check the format.
+
+        **Action 6**: [VERIFY_AND_FORMAT_ANSWER]
+        [Check reasonableness and ensure proper format]
+
+        **Observation 6**: [Final verified answer]
+
+    reflexion:
+      name: "DROP with Reflexion"
+      template: |
+        You are solving numerical reading comprehension using Reflexion methodology.
+
+        **Initial Numerical Reasoning Attempt**:
+        Let me first solve this numerical reasoning problem:
+
+        Passage Understanding: [Initial comprehension of numerical content]
+        Question Type: [Initial classification of reasoning needed]
+        
+        Data Extracted: [Initial information extraction]
+        Calculation Steps: [Initial reasoning and calculation process]
+        
+        Initial Answer: [First attempt result]
+
+        **Numerical Reasoning Reflection**:
+        Let me critically examine my numerical reasoning:
+        - Did I extract all relevant numerical information from the passage?
+        - Is my calculation method appropriate for this type of question?
+        - Did I make any arithmetic errors in my calculations?
+        - Are there alternative ways to interpret the numerical relationships?
+        - Did I consider all relevant constraints or conditions?
+        - Is my answer in the correct format and units?
+
+        **Numerical Issues Identified**:
+        [Specific problems with calculation method or data interpretation]
+
+        **Improved Numerical Strategy**:
+        After reflection, I should approach this numerical problem by:
+        [Enhanced method for numerical reasoning and calculation]
+
+        **Refined Numerical Solution**:
+        [Improved calculation with better methodology]
+
+        **Calculation Verification**:
+        [Thorough checking of numerical work and reasoning]
+
+        **Numerical Reasoning Learning**:
+        This reflection improved my numerical reasoning by:
+        [Key insights about quantitative analysis and calculation accuracy]
+
+  boolq:
+    base_info:
+      name: "BoolQ Yes/No Questions"
+      description: "Boolean questions requiring yes/no answers with reasoning"
+      difficulty: "basic"
+      reasoning_type: "boolean"
+    
+    cot:
+      name: "BoolQ with Chain of Thought"
+      template: |
+        You are answering yes/no questions using Chain of Thought reasoning.
+
+        **Step 1: Question Clarification**
+        Let me understand exactly what this yes/no question is asking...
+        [Clarify the specific claim or statement being evaluated]
+
+        **Step 2: Passage Information Review**
+        I need to find information in the passage that relates to this question:
+        [Identify relevant sections of the passage]
+
+        **Step 3: Evidence Evaluation**
+        Let me examine the evidence step by step:
+        [Analyze how the passage information supports or contradicts the question]
+
+        **Step 4: Logical Reasoning Process**
+        Based on the evidence, here's my reasoning:
+        [Show logical steps leading to yes or no conclusion]
+
+        **Step 5: Counterargument Consideration**
+        Let me consider if there are reasons for the opposite answer:
+        [Consider alternative interpretations or contradicting evidence]
+
+        **Step 6: Confidence Assessment**
+        How certain am I about this answer?
+        [Evaluate the strength of the evidence and reasoning]
+
+        **Step 7: Final Decision**
+        Based on my analysis:
+        [Clear justification for the yes/no decision]
+
+        **Answer:** Yes/No
+        **Reasoning:** [Clear explanation of why]
+        **Confidence:** [Level of certainty and why]
+
+    react:
+      name: "BoolQ with ReAct"
+      template: |
+        You are answering yes/no questions using ReAct methodology.
+
+        **Thought 1**: I need to understand exactly what claim this yes/no question is making.
+
+        **Action 1**: [CLARIFY_BOOLEAN_QUESTION]
+        [Identify the specific statement or claim being evaluated]
+
+        **Observation 1**: [Clear understanding of what needs to be verified]
+
+        **Thought 2**: I should look for relevant information in the passage.
+
+        **Action 2**: [SEARCH_PASSAGE_FOR_EVIDENCE]
+        [Find information in the passage related to the question]
+
+        **Observation 2**: [Relevant evidence found in the passage]
+
+        **Thought 3**: I need to evaluate whether the evidence supports a yes or no answer.
+
+        **Action 3**: [EVALUATE_EVIDENCE_FOR_BOOLEAN_ANSWER]
+        [Analyze how the evidence relates to the yes/no question]
+
+        **Observation 3**: [Assessment of evidence supporting yes or no]
+
+        **Thought 4**: I should consider if there might be contradicting evidence.
+
+        **Action 4**: [CHECK_FOR_CONTRADICTING_EVIDENCE]
+        [Look for information that might support the opposite answer]
+
+        **Observation 4**: [Any contradicting or qualifying information found]
+
+        **Thought 5**: I need to make a definitive yes or no decision based on the evidence.
+
+        **Action 5**: [MAKE_BOOLEAN_DECISION]
+        [Choose yes or no based on the strongest evidence]
+
+        **Observation 5**: [Final yes/no answer with reasoning and confidence level]
+
+    reflexion:
+      name: "BoolQ with Reflexion"
+      template: |
+        You are answering yes/no questions using Reflexion methodology.
+
+        **Initial Boolean Response**:
+        Let me first answer this yes/no question:
+
+        Question Understanding: [Initial interpretation of the question]
+        Evidence Found: [Initial evidence from passage]
+        
+        Reasoning: [Initial logical reasoning]
+        Initial Answer: Yes/No
+        Initial Confidence: [Initial confidence level]
+
+        **Boolean Reasoning Reflection**:
+        Let me reflect on my yes/no reasoning:
+        - Did I correctly understand what the question was asking?
+        - Did I find all relevant evidence in the passage?
+        - Is my interpretation of the evidence sound?
+        - Could there be alternative ways to interpret the information?
+        - Did I consider edge cases or exceptions?
+        - Is my confidence level appropriate given the evidence?
+
+        **Boolean Issues Identified**:
+        [Problems with initial boolean reasoning]
+
+        **Improved Boolean Strategy**:
+        After reflection, I should approach this yes/no question by:
+        [Enhanced method for boolean question analysis]
+
+        **Refined Boolean Answer**:
+        Answer: Yes/No
+        Reasoning: [Improved reasoning based on reflection]
+        Confidence: [Updated confidence level]
+
+        **Boolean Evidence Verification**:
+        [Thorough verification of evidence and reasoning]
+
+        **Boolean Reasoning Learning**:
+        This reflection improved my yes/no reasoning by:
+        [Key insights about boolean question analysis]
+
+  quac:
+    base_info:
+      name: "QuAC Conversational QA"
+      description: "Question Answering in Context - conversational dialogue"
+      difficulty: "advanced"
+      reasoning_type: "conversational"
+    
+    cot:
+      name: "QuAC with Chain of Thought"
+      template: |
+        You are answering conversational questions using Chain of Thought reasoning.
+
+        **Step 1: Conversation Context Analysis**
+        Let me review the conversation history to understand the context...
+        [Analyze previous questions and answers in the dialogue]
+
+        **Step 2: Current Question Understanding**
+        Now I need to understand what the current question is asking:
+        [Interpret the current question in light of the conversation context]
+
+        **Step 3: Reference Resolution**
+        I need to resolve any pronouns or references to previous topics:
+        [Identify what pronouns and references point to based on conversation history]
+
+        **Step 4: Relevant Information Gathering**
+        Based on the conversation context, I need this information:
+        [Identify what information is needed, considering both current question and conversation flow]
+
+        **Step 5: Contextual Answer Construction**
+        Given the conversational context, here's how I'll answer:
+        [Build answer that fits naturally in the conversation flow]
+
+        **Step 6: Conversation Flow Consideration**
+        My answer should maintain natural dialogue flow:
+        [Ensure the answer is conversational and contextually appropriate]
+
+        **Step 7: Follow-up Anticipation**
+        This answer might lead to these follow-up questions:
+        [Consider what the questioner might ask next]
+
+        **Answer:** [Natural, conversational response]
+        **Context Maintained:** [How this fits in the conversation]
+
+    react:
+      name: "QuAC with ReAct"
+      template: |
+        You are participating in conversational QA using ReAct methodology.
+
+        **Thought 1**: I need to understand the context of this conversation and where we are in the dialogue.
+
+        **Action 1**: [ANALYZE_CONVERSATION_CONTEXT]
+        [Review conversation history and understand the flow]
+
+        **Observation 1**: [Understanding of conversation context and history]
+
+        **Thought 2**: I should interpret the current question considering the conversational context.
+
+        **Action 2**: [INTERPRET_CONTEXTUAL_QUESTION]
+        [Understand current question in light of conversation history]
+
+        **Observation 2**: [What the current question is really asking given the context]
+
+        **Thought 3**: I need to resolve any references to previous parts of the conversation.
+
+        **Action 3**: [RESOLVE_CONVERSATIONAL_REFERENCES]
+        [Identify what pronouns and references point to]
+
+        **Observation 3**: [Clear understanding of all references and their targets]
+
+        **Thought 4**: I should gather relevant information to answer in context.
+
+        **Action 4**: [GATHER_CONTEXTUAL_INFORMATION]
+        [Find information relevant to both the question and conversation flow]
+
+        **Observation 4**: [Information gathered with conversational context in mind]
+
+        **Thought 5**: I need to provide an answer that fits naturally in the conversation.
+
+        **Action 5**: [CONSTRUCT_CONVERSATIONAL_ANSWER]
+        [Build response that maintains dialogue flow and context]
+
+        **Observation 5**: [Conversational answer that fits the dialogue context]
+
+    reflexion:
+      name: "QuAC with Reflexion"
+      template: |
+        You are participating in conversational QA using Reflexion methodology.
+
+        **Initial Conversational Response**:
+        Let me first answer this conversational question:
+
+        Context Understanding: [Initial understanding of conversation context]
+        Question Interpretation: [Initial interpretation of current question]
+        
+        Reference Resolution: [Initial resolution of pronouns/references]
+        Initial Answer: [First conversational response]
+
+        **Conversational Reasoning Reflection**:
+        Let me reflect on my conversational QA approach:
+        - Did I properly consider the full conversation context?
+        - Are my reference resolutions correct given the dialogue history?
+        - Does my answer maintain natural conversation flow?
+        - Is my response appropriate for the conversational setting?
+        - Did I miss any implicit context from the dialogue?
+        - Would my answer lead to natural follow-up questions?
+
+        **Conversational Issues Identified**:
+        [Problems with conversational context or dialogue flow]
+
+        **Improved Conversational Strategy**:
+        After reflection, I should improve my conversational response by:
+        [Enhanced approach to conversational context and dialogue flow]
+
+        **Refined Conversational Answer**:
+        [Improved response that better fits the conversational context]
+
+        **Dialogue Flow Verification**:
+        [Check that answer maintains natural conversation progression]
+
+        **Conversational QA Learning**:
+        This reflection improved my conversational skills by:
+        [Key insights about maintaining dialogue context and flow]
+
+  arc:
+    base_info:
+      name: "ARC Science Questions"
+      description: "AI2 Reasoning Challenge - grade-school science questions"
+      difficulty: "intermediate"
+      reasoning_type: "scientific"
+    
+    cot:
+      name: "ARC with Chain of Thought"
+      template: |
+        You are answering science questions using Chain of Thought reasoning.
+
+        **Step 1: Scientific Domain Identification**
+        Let me identify what area of science this question covers...
+        [Determine the scientific field: physics, chemistry, biology, earth science, etc.]
+
+        **Step 2: Relevant Scientific Principles**
+        The key scientific concepts needed for this question are:
+        [Identify relevant scientific laws, principles, or concepts]
+
+        **Step 3: Question Analysis in Scientific Context**
+        Breaking down what this question is asking scientifically:
+        [Analyze the question from a scientific perspective]
+
+        **Step 4: Scientific Knowledge Application**
+        Applying scientific principles to this problem:
+        [Show how scientific knowledge applies to the specific question]
+
+        **Step 5: Option Evaluation with Scientific Reasoning**
+        Let me evaluate each option using scientific logic:
+
+        Option A: [Scientific analysis of this choice]
+        Option B: [Scientific analysis of this choice]
+        Option C: [Scientific analysis of this choice]
+        Option D: [Scientific analysis of this choice]
+
+        **Step 6: Scientific Elimination Process**
+        Based on scientific principles, I can eliminate:
+        [Show which options violate scientific principles]
+
+        **Step 7: Best Scientific Answer Selection**
+        The most scientifically accurate answer is:
+        [Choose answer with scientific justification]
+
+        **Answer:** [Selected option]
+        **Scientific Justification:** [Clear scientific reasoning for the choice]
+
+    react:
+      name: "ARC with ReAct"
+      template: |
+        You are answering science questions using ReAct methodology.
+
+        **Thought 1**: I need to identify what area of science this question is testing.
+
+        **Action 1**: [IDENTIFY_SCIENCE_DOMAIN]
+        [Determine the scientific field and concepts involved]
+
+        **Observation 1**: [Scientific domain and key concepts identified]
+
+        **Thought 2**: I should recall the relevant scientific principles for this topic.
+
+        **Action 2**: [RECALL_SCIENTIFIC_PRINCIPLES]
+        [Access relevant scientific knowledge and principles]
+
+        **Observation 2**: [Key scientific principles and laws that apply]
+
+        **Thought 3**: I need to analyze how these principles apply to this specific question.
+
+        **Action 3**: [APPLY_SCIENTIFIC_KNOWLEDGE]
+        [Connect scientific principles to the question scenario]
+
+        **Observation 3**: [How scientific knowledge applies to this problem]
+
+        **Thought 4**: I should evaluate each answer choice using scientific reasoning.
+
+        **Action 4**: [EVALUATE_OPTIONS_SCIENTIFICALLY]
+        [Assess each option against scientific principles]
+
+        **Observation 4**: [Scientific evaluation of each answer choice]
+
+        **Thought 5**: I can eliminate options that violate scientific principles.
+
+        **Action 5**: [ELIMINATE_SCIENTIFICALLY_INCORRECT_OPTIONS]
+        [Remove answers that contradict scientific knowledge]
+
+        **Observation 5**: [Remaining scientifically viable options]
+
+        **Thought 6**: I should select the most scientifically accurate answer.
+
+        **Action 6**: [SELECT_BEST_SCIENTIFIC_ANSWER]
+        [Choose the option with strongest scientific support]
+
+        **Observation 6**: [Final scientifically justified answer]
+
+    reflexion:
+      name: "ARC with Reflexion"
+      template: |
+        You are answering science questions using Reflexion methodology.
+
+        **Initial Scientific Response**:
+        Let me first answer this science question:
+
+        Science Domain: [Initial identification of scientific area]
+        Scientific Principles: [Initial scientific knowledge applied]
+        
+        Option Analysis: [Initial evaluation of choices]
+        Initial Answer: [First scientific conclusion]
+
+        **Scientific Reasoning Reflection**:
+        Let me reflect on my scientific reasoning:
+        - Did I correctly identify the relevant scientific principles?
+        - Am I applying scientific knowledge accurately?
+        - Are there other scientific concepts I should consider?
+        - Did I properly evaluate each option against scientific evidence?
+        - Could there be exceptions or special cases in the science?
+        - Is my scientific reasoning logically sound?
+
+        **Scientific Issues Identified**:
+        [Problems with initial scientific analysis]
+
+        **Improved Scientific Strategy**:
+        After reflection, I should apply scientific knowledge more carefully by:
+        [Enhanced approach to scientific reasoning and principle application]
+
+        **Refined Scientific Answer**:
+        [Improved answer with better scientific reasoning]
+
+        **Scientific Verification**:
+        [Thorough checking of scientific logic and principle application]
+
+        **Scientific Learning**:
+        This reflection improved my scientific reasoning by:
+        [Key insights about applying scientific knowledge more effectively]
+
+  triviaqa:
+    base_info:
+      name: "TriviaQA"
+      description: "Trivia questions with supporting documents"
+      difficulty: "intermediate"
+      reasoning_type: "factual"
+    
+    cot:
+      name: "TriviaQA with Chain of Thought"
+      template: |
+        You are answering trivia questions using Chain of Thought reasoning with supporting documents.
+
+        **Step 1: Trivia Question Analysis**
+        Let me understand what factual information this trivia question is seeking...
+        [Analyze the type of factual knowledge needed]
+
+        **Step 2: Document Relevance Assessment**
+        I need to examine the provided documents for relevant information:
+        [Plan systematic review of all supporting documents]
+
+        **Step 3: Systematic Document Search**
+        Let me search through each document:
+
+        Document 1: [Assess relevance and extract key facts]
+        Document 2: [Assess relevance and extract key facts]
+        [Continue for all documents]
+
+        **Step 4: Fact Verification and Cross-Reference**
+        I'll verify facts across multiple sources when possible:
+        [Check consistency of information across documents]
+
+        **Step 5: Answer Construction**
+        Based on the documented evidence:
+        [Build factual answer using document information]
+
+        **Step 6: Source Attribution**
+        My answer is supported by these sources:
+        [Identify which documents provided the key information]
+
+        **Step 7: Completeness Check**
+        Does my answer fully address the trivia question?
+        [Ensure the response is complete and accurate]
+
+        **Answer:** [Clear, factual response]
+        **Supporting Sources:** [Documents that contain the evidence]
+
+    react:
+      name: "TriviaQA with ReAct"
+      template: |
+        You are answering trivia questions with supporting documents using ReAct methodology.
+
+        **Thought 1**: I need to understand what specific factual information this trivia question is asking for.
+
+        **Action 1**: [ANALYZE_TRIVIA_QUESTION]
+        [Determine the type of factual knowledge needed]
+
+        **Observation 1**: [Understanding of what facts are required]
+
+        **Thought 2**: I should systematically examine all provided supporting documents.
+
+        **Action 2**: [REVIEW_SUPPORTING_DOCUMENTS]
+        [Go through each document to assess relevance]
+
+        **Observation 2**: [Overview of document contents and relevance]
+
+        **Thought 3**: I need to extract specific facts from the most relevant documents.
+
+        **Action 3**: [EXTRACT_FACTUAL_INFORMATION]
+        [Pull out specific facts that answer the trivia question]
+
+        **Observation 3**: [Key facts extracted from documents]
+
+        **Thought 4**: I should verify facts across multiple sources if possible.
+
+        **Action 4**: [VERIFY_FACTS_ACROSS_SOURCES]
+        [Cross-check information for consistency and reliability]
+
+        **Observation 4**: [Verification results and fact reliability]
+
+        **Thought 5**: I can now formulate a factual answer based on the documented evidence.
+
+        **Action 5**: [CONSTRUCT_FACTUAL_ANSWER]
+        [Build response using verified facts from documents]
+
+        **Observation 5**: [Complete factual answer with source attribution]
+
+    reflexion:
+      name: "TriviaQA with Reflexion"
+      template: |
+        You are answering trivia questions with supporting documents using Reflexion methodology.
+
+        **Initial Trivia Response**:
+        Let me first answer this trivia question:
+
+        Question Analysis: [Initial understanding of factual information needed]
+        Document Review: [Initial assessment of supporting documents]
+        
+        Facts Found: [Initial fact extraction]
+        Initial Answer: [First factual response]
+
+        **Trivia Research Reflection**:
+        Let me reflect on my trivia research process:
+        - Did I thoroughly examine all provided documents?
+        - Am I using the most reliable and specific information available?
+        - Did I verify facts across multiple sources when possible?
+        - Is my answer complete and directly responsive to the question?
+        - Did I miss any important details in the documents?
+        - Are there potential ambiguities in the factual information?
+
+        **Fact-Finding Issues Identified**:
+        [Problems with initial document analysis or fact extraction]
+
+        **Improved Research Strategy**:
+        After reflection, I should improve my trivia research by:
+        [Enhanced approach to document analysis and fact verification]
+
+        **Refined Factual Answer**:
+        [Improved answer based on better document analysis]
+
+        **Source Verification**:
+        [Thorough verification of facts and source reliability]
+
+        **Trivia Research Learning**:
+        This reflection improved my factual research by:
+        [Key insights about effective fact-finding and verification]
+
+tools_config:
+  required_tools: ["search_documents", "extract_information"]
+  optional_tools: ["calculate_numbers", "verify_facts", "summarize_text"]
+
+reasoning_types:
+  cot: "Chain of Thought - Step-by-step logical reasoning for QA tasks"
+  react: "ReAct - Reasoning and Acting with QA-focused Thought-Action-Observation cycles"
+  reflexion: "Reflexion - Self-reflective improvement of question answering and reasoning"
+
+qa_types:
+  extractive: "Extract answers directly from given text"
+  multi_hop: "Reason across multiple pieces of information"
+  commonsense: "Apply everyday knowledge and reasoning"
+  conversational: "Maintain context in dialogue-based QA"
+  numerical: "Perform calculations and quantitative reasoning"
+  factual: "Retrieve and verify factual information"
+  boolean: "Make yes/no decisions with reasoning"
+  scientific: "Apply scientific knowledge and principles"
+  passage_based: "Answer based on provided passages"
+  open_domain: "Draw from general knowledge"
+
+difficulty_levels:
+  basic: ["boolq"]
+  intermediate: ["squad", "naturalqa", "msmarco", "commonsenseqa", "arc", "triviaqa"]
+  advanced: ["hotpotqa", "drop", "quac"]
+
+benchmarks:
+  reading_comprehension: ["squad", "msmarco", "drop"]
+  multi_hop_reasoning: ["hotpotqa"]
+  commonsense_reasoning: ["commonsenseqa", "arc"]
+  conversational_qa: ["quac"]
+  open_domain_qa: ["naturalqa", "triviaqa"]
+  boolean_qa: ["boolq"]
+
+usage_examples:
+  # Access specific benchmark and reasoning type
+  # prompts[benchmark][reasoning_type] 
+  # e.g., prompts.hotpotqa.cot, prompts.squad.react, prompts.arc.reflexion
+  
+  # Access base information for a benchmark
+  # prompts[benchmark].base_info
+  # e.g., prompts.hotpotqa.base_info, prompts.naturalqa.base_info

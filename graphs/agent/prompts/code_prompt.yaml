@@ -1,0 +1,1124 @@
+version: "1.0"
+description: "Code problem solving prompts for different programming benchmarks"
+
+prompts:
+  humaneval:
+    base_info:
+      name: "HumanEval Python Coding"
+      description: "Python function completion tasks from HumanEval benchmark"
+      difficulty: "intermediate"
+      language: "python"
+    
+    cot:
+      name: "HumanEval with Chain of Thought"
+      template: |
+        You are an expert Python programmer solving HumanEval coding problems using Chain of Thought reasoning.
+
+        Follow this step-by-step thinking process:
+
+        1. **Problem Understanding**: 
+           - Read the docstring carefully
+           - Identify what the function should do
+           - Note input/output types and constraints
+
+        2. **Step-by-Step Reasoning**:
+           - Break down the problem into smaller steps
+           - Think through each step logically
+           - Consider edge cases and special conditions
+
+        3. **Algorithm Development**:
+           - Design the solution step by step
+           - Explain why each step is necessary
+           - Validate the logic at each step
+
+        Format your response as:
+        **Step 1: Problem Analysis**
+        Let me understand what this function needs to do...
+        [Detailed analysis of the problem]
+
+        **Step 2: Breaking Down the Solution**
+        I need to approach this by...
+        [Step-by-step reasoning process]
+
+        **Step 3: Implementation Planning**
+        Based on my analysis, here's how I'll implement it...
+        [Detailed implementation plan]
+
+        **Step 4: Code Implementation**
+        ```python
+        [Your complete solution with inline comments explaining the reasoning]
+        ```
+
+        **Step 5: Verification**
+        Let me verify this works with the examples...
+        [Walk through examples step by step]
+
+    react:
+      name: "HumanEval with ReAct (Reasoning + Acting)"
+      template: |
+        You are an expert Python programmer using ReAct methodology to solve HumanEval problems.
+
+        Use the Thought-Action-Observation cycle:
+
+        **Thought**: Reason about what you need to do
+        **Action**: Take a specific action (analyze, plan, implement, test)
+        **Observation**: Observe the results and plan next steps
+
+        Solve the problem systematically:
+
+        **Thought 1**: I need to understand this HumanEval problem. Let me analyze the function signature and docstring.
+
+        **Action 1**: [ANALYZE_PROBLEM]
+        [Detailed analysis of what the function should do]
+
+        **Observation 1**: [What you learned from the analysis]
+
+        **Thought 2**: Now I need to plan my approach based on the requirements.
+
+        **Action 2**: [PLAN_SOLUTION]
+        [Step-by-step solution strategy]
+
+        **Observation 2**: [How feasible and correct your plan seems]
+
+        **Thought 3**: Let me implement the solution according to my plan.
+
+        **Action 3**: [IMPLEMENT_CODE]
+        ```python
+        [Your implementation with reasoning comments]
+        ```
+
+        **Observation 3**: [Review of your implementation]
+
+        **Thought 4**: I should test this with the provided examples to verify correctness.
+
+        **Action 4**: [TEST_SOLUTION]
+        [Walk through test cases]
+
+        **Observation 4**: [Final verification and any adjustments needed]
+
+    reflexion:
+      name: "HumanEval with Reflexion"
+      template: |
+        You are an expert Python programmer using Reflexion methodology to solve HumanEval problems.
+
+        Use this self-reflective approach:
+
+        **Initial Attempt**:
+        Let me first attempt to solve this problem:
+
+        ```python
+        # First attempt
+        [Initial implementation]
+        ```
+
+        **Self-Reflection**:
+        Let me critically analyze my solution:
+        - Does it handle all edge cases?
+        - Is the logic correct for all inputs?
+        - Are there any potential bugs or issues?
+        - Can I improve the efficiency or clarity?
+
+        **Identified Issues**:
+        [List any problems you found in your initial attempt]
+
+        **Refined Approach**:
+        Based on my reflection, here's my improved approach:
+        [Explain what you'll change and why]
+
+        **Final Implementation**:
+        ```python
+        # Refined solution after reflection
+        [Your improved implementation]
+        ```
+
+        **Final Verification**:
+        Let me verify this refined solution:
+        [Test with examples and edge cases]
+
+        **Learning Summary**:
+        What I learned from this reflexive process:
+        [Key insights gained through self-reflection]
+
+  mbpp:
+    base_info:
+      name: "MBPP Python Programming"
+      description: "Mostly Basic Python Programming Problems"
+      difficulty: "basic"
+      language: "python"
+    
+    cot:
+      name: "MBPP with Chain of Thought"
+      template: |
+        You are solving basic Python programming problems using Chain of Thought reasoning.
+
+        Think through each step carefully:
+
+        **Step 1: Understanding the Problem**
+        Let me carefully read and understand what this problem is asking...
+        [Detailed problem understanding]
+
+        **Step 2: Input/Output Analysis**
+        I need to figure out exactly what inputs I'll receive and what output I should produce...
+        [Analysis of input/output requirements]
+
+        **Step 3: Solution Strategy**
+        Now let me think about how to solve this step by step...
+        [Logical breakdown of the solution approach]
+
+        **Step 4: Implementation Planning**
+        Based on my analysis, here's how I'll implement the solution...
+        [Detailed implementation plan]
+
+        **Step 5: Code Implementation**
+        ```python
+        [Your Python solution with step-by-step comments]
+        ```
+
+        **Step 6: Testing and Verification**
+        Let me verify this works with the given examples...
+        [Step-by-step verification with examples]
+
+    react:
+      name: "MBPP with ReAct"
+      template: |
+        You are solving basic Python programming problems using ReAct methodology.
+
+        **Thought 1**: I need to understand what this MBPP problem is asking for.
+
+        **Action 1**: [READ_PROBLEM]
+        [Carefully read and understand the problem statement]
+
+        **Observation 1**: [What you understood from the problem]
+
+        **Thought 2**: I should analyze the expected input and output format.
+
+        **Action 2**: [ANALYZE_IO]
+        [Analyze input/output requirements and examples]
+
+        **Observation 2**: [Your understanding of the I/O format]
+
+        **Thought 3**: Now I need to plan a simple and clear solution approach.
+
+        **Action 3**: [PLAN_SIMPLE_SOLUTION]
+        [Plan a straightforward solution strategy]
+
+        **Observation 3**: [Assessment of your plan's feasibility]
+
+        **Thought 4**: Let me implement the solution according to my plan.
+
+        **Action 4**: [IMPLEMENT_SOLUTION]
+        ```python
+        [Your implementation]
+        ```
+
+        **Observation 4**: [Review of your implementation]
+
+        **Thought 5**: I should test this with the provided examples.
+
+        **Action 5**: [TEST_WITH_EXAMPLES]
+        [Test your solution with examples]
+
+        **Observation 5**: [Results and final assessment]
+
+    reflexion:
+      name: "MBPP with Reflexion"
+      template: |
+        You are solving basic Python programming problems using Reflexion methodology.
+
+        **Initial Solution Attempt**:
+        Let me first try to solve this problem directly:
+
+        ```python
+        # Initial attempt
+        [First implementation]
+        ```
+
+        **Self-Reflection**:
+        Let me reflect on my initial solution:
+        - Is the logic clear and easy to follow?
+        - Does it handle all the given examples correctly?
+        - Are there any edge cases I might have missed?
+        - Is there a simpler or more Pythonic way to write this?
+
+        **Issues Identified**:
+        [Any problems or improvements you identified]
+
+        **Improved Approach**:
+        Based on my reflection, here's what I'll improve:
+        [Explanation of improvements]
+
+        **Refined Solution**:
+        ```python
+        # Improved solution after reflection
+        [Your refined implementation]
+        ```
+
+        **Final Testing**:
+        Let me test this refined solution:
+        [Verification with examples]
+
+        **Reflection Summary**:
+        Through this reflexive process, I learned:
+        [Key insights from the reflection process]
+
+  codex:
+    base_info:
+      name: "Codex Code Generation"
+      description: "General code generation tasks across multiple languages"
+      difficulty: "intermediate"
+      language: "multi"
+    
+    cot:
+      name: "Codex with Chain of Thought"
+      template: |
+        You are an expert programmer using Chain of Thought reasoning for code generation tasks.
+
+        **Step 1: Requirements Analysis**
+        Let me carefully analyze what needs to be implemented...
+        [Detailed analysis of requirements]
+
+        **Step 2: Language and Approach Selection**
+        Based on the requirements, I need to decide on the best language and approach...
+        [Reasoning for language choice and overall approach]
+
+        **Step 3: Design Pattern Analysis**
+        For this problem, I should consider which design patterns and data structures are most appropriate...
+        [Analysis of suitable algorithms, data structures, and patterns]
+
+        **Step 4: Step-by-Step Implementation Planning**
+        Let me break down the implementation into logical steps...
+        [Detailed implementation plan with reasoning]
+
+        **Step 5: Error Handling Considerations**
+        I need to think about potential edge cases and error conditions...
+        [Analysis of edge cases and error handling strategy]
+
+        **Step 6: Implementation**
+        ```[language]
+        [Your complete solution with detailed comments explaining the reasoning]
+        ```
+
+        **Step 7: Verification and Edge Case Testing**
+        Let me verify this implementation handles all requirements and edge cases...
+        [Verification process and edge case analysis]
+
+    react:
+      name: "Codex with ReAct"
+      template: |
+        You are an expert programmer using ReAct methodology for code generation.
+
+        **Thought 1**: I need to understand exactly what this code generation task requires.
+
+        **Action 1**: [ANALYZE_REQUIREMENTS]
+        [Detailed analysis of what needs to be implemented]
+
+        **Observation 1**: [What you learned about the requirements]
+
+        **Thought 2**: I need to choose the most appropriate programming language and approach.
+
+        **Action 2**: [SELECT_LANGUAGE_AND_APPROACH]
+        [Decision on language and overall strategy with reasoning]
+
+        **Observation 2**: [Assessment of your language and approach choice]
+
+        **Thought 3**: I should design the overall structure and choose appropriate algorithms.
+
+        **Action 3**: [DESIGN_SOLUTION_ARCHITECTURE]
+        [Design the solution structure, algorithms, and data structures]
+
+        **Observation 3**: [Evaluation of your design choices]
+
+        **Thought 4**: Now I need to implement the solution step by step.
+
+        **Action 4**: [IMPLEMENT_CODE]
+        ```[language]
+        [Your implementation with explanatory comments]
+        ```
+
+        **Observation 4**: [Review of your implementation]
+
+        **Thought 5**: I should consider error handling and edge cases.
+
+        **Action 5**: [ADD_ERROR_HANDLING]
+        [Analysis and addition of error handling]
+
+        **Observation 5**: [Final assessment of robustness and completeness]
+
+    reflexion:
+      name: "Codex with Reflexion"
+      template: |
+        You are an expert programmer using Reflexion methodology for code generation.
+
+        **Initial Implementation**:
+        Let me first implement a solution based on my initial understanding:
+
+        ```[language]
+        // Initial implementation
+        [First version of the code]
+        ```
+
+        **Critical Self-Reflection**:
+        Let me critically examine my initial implementation:
+        - Is the code structure optimal and maintainable?
+        - Does it handle all edge cases properly?
+        - Are there security or performance concerns?
+        - Is the error handling comprehensive?
+        - Could the code be more readable or efficient?
+        - Are there better design patterns I could use?
+
+        **Identified Improvements**:
+        [List specific issues and potential improvements]
+
+        **Refined Design**:
+        Based on my reflection, here's my improved approach:
+        [Explanation of design improvements and reasoning]
+
+        **Enhanced Implementation**:
+        ```[language]
+        // Improved implementation after reflection
+        [Your refined code with better structure, error handling, etc.]
+        ```
+
+        **Final Verification**:
+        Let me verify this enhanced implementation:
+        [Testing and verification of the improved solution]
+
+        **Reflection Insights**:
+        Through this reflexive process, I improved:
+        [Summary of key improvements and lessons learned]
+
+  leetcode:
+    base_info:
+      name: "LeetCode Algorithm Problems"
+      description: "Algorithmic problem solving for technical interviews"
+      difficulty: "intermediate-advanced"
+      language: "python"
+    
+    cot:
+      name: "LeetCode with Chain of Thought"
+      template: |
+        You are solving LeetCode algorithmic problems using Chain of Thought reasoning.
+
+        **Step 1: Problem Understanding**
+        Let me carefully understand this LeetCode problem...
+        [Detailed problem analysis including constraints and requirements]
+
+        **Step 2: Pattern Recognition**
+        I need to identify what type of algorithmic problem this is...
+        [Analysis of problem patterns - Array, String, Tree, Graph, DP, etc.]
+
+        **Step 3: Approach Analysis**
+        Let me think through different possible approaches and their trade-offs...
+        [Compare different algorithmic approaches and their complexities]
+
+        **Step 4: Optimal Strategy Selection**
+        Based on my analysis, the optimal approach is...
+        [Reasoning for choosing the best approach]
+
+        **Step 5: Algorithm Design**
+        Let me design the algorithm step by step...
+        [Detailed algorithm design with logical steps]
+
+        **Step 6: Complexity Analysis**
+        Time Complexity: O(?) - because...
+        Space Complexity: O(?) - because...
+        [Detailed complexity analysis with reasoning]
+
+        **Step 7: Implementation**
+        ```python
+        class Solution:
+            def methodName(self, params):
+                # Step-by-step implementation with reasoning comments
+                [Your implementation]
+        ```
+
+        **Step 8: Verification**
+        Let me trace through the examples to verify correctness...
+        [Step-by-step verification with examples]
+
+    react:
+      name: "LeetCode with ReAct"
+      template: |
+        You are solving LeetCode problems using ReAct methodology.
+
+        **Thought 1**: I need to understand this LeetCode problem and identify its pattern.
+
+        **Action 1**: [ANALYZE_PROBLEM]
+        [Problem analysis including constraints and examples]
+
+        **Observation 1**: [What type of problem this is and key insights]
+
+        **Thought 2**: I should consider different algorithmic approaches for this problem type.
+
+        **Action 2**: [EXPLORE_APPROACHES]
+        [List and analyze different possible approaches]
+
+        **Observation 2**: [Comparison of approaches and their trade-offs]
+
+        **Thought 3**: I need to select the optimal approach based on complexity requirements.
+
+        **Action 3**: [SELECT_OPTIMAL_APPROACH]
+        [Choose the best approach and justify the decision]
+
+        **Observation 3**: [Validation of the chosen approach]
+
+        **Thought 4**: Let me design and implement the algorithm.
+
+        **Action 4**: [IMPLEMENT_ALGORITHM]
+        ```python
+        class Solution:
+            def methodName(self, params):
+                [Your implementation]
+        ```
+
+        **Observation 4**: [Review of the implementation]
+
+        **Thought 5**: I should analyze complexity and test with examples.
+
+        **Action 5**: [ANALYZE_AND_TEST]
+        Time: O(?), Space: O(?)
+        [Test with examples]
+
+        **Observation 5**: [Final verification and complexity confirmation]
+
+    reflexion:
+      name: "LeetCode with Reflexion"
+      template: |
+        You are solving LeetCode problems using Reflexion methodology.
+
+        **Initial Solution Attempt**:
+        Let me first attempt to solve this problem:
+
+        ```python
+        class Solution:
+            def methodName(self, params):
+                # Initial attempt
+                [First implementation]
+        ```
+
+        **Initial Complexity Analysis**:
+        Time: O(?), Space: O(?)
+
+        **Self-Reflection and Critique**:
+        Let me critically analyze my initial solution:
+        - Is this the most efficient approach possible?
+        - Are there any edge cases I haven't considered?
+        - Can I optimize the time or space complexity?
+        - Is there a more elegant or cleaner implementation?
+        - Did I miss any important algorithmic patterns?
+
+        **Issues and Optimization Opportunities**:
+        [Specific issues identified and potential optimizations]
+
+        **Improved Strategy**:
+        After reflection, here's a better approach:
+        [Explanation of improved algorithm and reasoning]
+
+        **Optimized Implementation**:
+        ```python
+        class Solution:
+            def methodName(self, params):
+                # Optimized solution after reflection
+                [Your improved implementation]
+        ```
+
+        **Improved Complexity**:
+        Time: O(?), Space: O(?)
+
+        **Verification and Edge Cases**:
+        [Test improved solution with examples and edge cases]
+
+        **Learning Summary**:
+        Key insights gained through reflection:
+        [What you learned and how the solution improved]
+
+  apps:
+    base_info:
+      name: "APPS Programming Problems"
+      description: "Automated Programming Progress Standard - competitive programming"
+      difficulty: "advanced"
+      language: "python"
+    
+    cot:
+      name: "APPS with Chain of Thought"
+      template: |
+        You are solving competitive programming problems from APPS using Chain of Thought reasoning.
+
+        **Step 1: Problem Statement Analysis**
+        Let me carefully parse and understand this competitive programming problem...
+        [Detailed analysis of problem statement, constraints, and requirements]
+
+        **Step 2: Constraint and Complexity Planning**
+        I need to understand the time and memory limits to choose the right approach...
+        [Analysis of constraints and complexity requirements]
+
+        **Step 3: Algorithm Pattern Recognition**
+        This problem appears to involve...
+        [Identify the algorithmic patterns: DP, Graph Theory, Greedy, Number Theory, etc.]
+
+        **Step 4: Mathematical Insight Development**
+        Let me think about the mathematical properties and insights needed...
+        [Mathematical analysis and key insights for the problem]
+
+        **Step 5: Solution Strategy Design**
+        Based on my analysis, here's my step-by-step strategy...
+        [Detailed solution strategy with reasoning]
+
+        **Step 6: Implementation Planning**
+        I'll implement this using the following approach...
+        [Implementation plan with data structures and algorithm details]
+
+        **Step 7: Code Implementation**
+        ```python
+        [Your complete competitive programming solution with detailed comments]
+        ```
+
+        **Step 8: Complexity Verification**
+        Time Complexity: O(?) - [reasoning]
+        Space Complexity: O(?) - [reasoning]
+        [Verify this meets the problem constraints]
+
+        **Step 9: Edge Case Analysis**
+        Let me consider edge cases and boundary conditions...
+        [Analysis of edge cases and how they're handled]
+
+    react:
+      name: "APPS with ReAct"
+      template: |
+        You are solving APPS competitive programming problems using ReAct methodology.
+
+        **Thought 1**: I need to carefully understand this competitive programming problem and its constraints.
+
+        **Action 1**: [PARSE_PROBLEM_STATEMENT]
+        [Detailed parsing of problem statement and constraints]
+
+        **Observation 1**: [Key insights about the problem type and difficulty]
+
+        **Thought 2**: I need to analyze the time and space complexity requirements.
+
+        **Action 2**: [ANALYZE_CONSTRAINTS]
+        [Analysis of time/memory limits and input size]
+
+        **Observation 2**: [What this tells me about the required algorithmic complexity]
+
+        **Thought 3**: I should identify the algorithmic patterns and techniques needed.
+
+        **Action 3**: [IDENTIFY_ALGORITHMS]
+        [Identify relevant algorithms: DP, graphs, number theory, etc.]
+
+        **Observation 3**: [Which algorithmic approaches are suitable]
+
+        **Thought 4**: I need to design an efficient solution strategy.
+
+        **Action 4**: [DESIGN_SOLUTION]
+        [Design the overall solution approach]
+
+        **Observation 4**: [Validation of the solution design]
+
+        **Thought 5**: Let me implement the solution with careful attention to edge cases.
+
+        **Action 5**: [IMPLEMENT_SOLUTION]
+        ```python
+        [Your competitive programming implementation]
+        ```
+
+        **Observation 5**: [Review implementation for correctness and efficiency]
+
+        **Thought 6**: I should verify the complexity and test with sample cases.
+
+        **Action 6**: [VERIFY_SOLUTION]
+        [Complexity analysis and testing]
+
+        **Observation 6**: [Final validation of the solution]
+
+    reflexion:
+      name: "APPS with Reflexion"
+      template: |
+        You are solving APPS competitive programming problems using Reflexion methodology.
+
+        **Initial Solution Attempt**:
+        Let me first attempt to solve this competitive programming problem:
+
+        ```python
+        # Initial competitive programming solution
+        [First implementation]
+        ```
+
+        **Initial Complexity**: Time O(?), Space O(?)
+
+        **Critical Competitive Programming Reflection**:
+        Let me reflect on my solution from a competitive programming perspective:
+        - Is this solution fast enough for the given constraints?
+        - Are there mathematical insights I missed that could lead to a more efficient solution?
+        - Did I handle all edge cases properly?
+        - Could there be integer overflow or precision issues?
+        - Is there a more elegant algorithmic approach?
+        - Are there standard competitive programming techniques I should apply?
+
+        **Competitive Programming Issues Identified**:
+        [Specific issues with efficiency, correctness, or competitive programming best practices]
+
+        **Advanced Strategy After Reflection**:
+        After reflection, I realize I should use:
+        [Improved algorithmic approach with competitive programming optimizations]
+
+        **Optimized Competitive Programming Solution**:
+        ```python
+        # Optimized solution for competitive programming
+        [Your improved implementation optimized for competitive programming]
+        ```
+
+        **Optimized Complexity**: Time O(?), Space O(?)
+
+        **Competitive Programming Verification**:
+        [Verify the solution handles large inputs efficiently and correctly]
+
+        **Competitive Programming Insights**:
+        Through reflection, I learned these competitive programming lessons:
+        [Key insights about algorithms, optimizations, and competitive programming techniques]
+
+  code_contests:
+    base_info:
+      name: "Code Contests"
+      description: "Competitive programming contest problems"
+      difficulty: "advanced"
+      language: "python"
+    
+    cot:
+      name: "Code Contests with Chain of Thought"
+      template: |
+        You are participating in a programming contest using Chain of Thought reasoning.
+
+        **Step 1: Rapid Problem Analysis**
+        In a contest setting, I need to quickly understand what this problem is asking...
+        [Quick but thorough analysis of the problem]
+
+        **Step 2: Pattern Recognition and Classification**
+        This looks like a [problem type] problem because...
+        [Quickly identify the problem category and relevant algorithms]
+
+        **Step 3: Complexity Assessment**
+        Given the constraints, I need an algorithm that runs in...
+        [Determine required time complexity based on input limits]
+
+        **Step 4: Algorithm Selection and Justification**
+        For this contest problem, the optimal approach is...
+        [Choose algorithm with reasoning for contest context]
+
+        **Step 5: Implementation Strategy**
+        I'll implement this efficiently for contest submission...
+        [Plan implementation focusing on correctness and speed]
+
+        **Step 6: Contest-Ready Implementation**
+        ```python
+        [Your contest-ready solution with minimal but clear comments]
+        ```
+
+        **Step 7: Quick Verification**
+        Let me quickly verify this works with the sample...
+        [Fast verification process suitable for contest environment]
+
+        **Step 8: Edge Case Check**
+        Contest problems often have these edge cases...
+        [Quick edge case verification]
+
+    react:
+      name: "Code Contests with ReAct"
+      template: |
+        You are in a programming contest using ReAct methodology.
+
+        **Thought 1**: I need to quickly understand this contest problem and identify the key pattern.
+
+        **Action 1**: [RAPID_PROBLEM_ANALYSIS]
+        [Quick analysis of problem statement and examples]
+
+        **Observation 1**: [Problem type and key insights identified]
+
+        **Thought 2**: I need to determine the required time complexity based on constraints.
+
+        **Action 2**: [ANALYZE_CONSTRAINTS]
+        [Quick constraint analysis to determine complexity requirements]
+
+        **Observation 2**: [Required algorithmic complexity]
+
+        **Thought 3**: I should identify the most suitable algorithm for contest conditions.
+
+        **Action 3**: [SELECT_CONTEST_ALGORITHM]
+        [Choose algorithm optimized for contest implementation]
+
+        **Observation 3**: [Validation of algorithm choice for contest setting]
+
+        **Thought 4**: Time to implement efficiently for contest submission.
+
+        **Action 4**: [IMPLEMENT_FOR_CONTEST]
+        ```python
+        [Your contest implementation]
+        ```
+
+        **Observation 4**: [Quick review of implementation]
+
+        **Thought 5**: I need to verify with samples and consider edge cases quickly.
+
+        **Action 5**: [RAPID_VERIFICATION]
+        [Quick testing and edge case consideration]
+
+        **Observation 5**: [Final contest readiness assessment]
+
+    reflexion:
+      name: "Code Contests with Reflexion"
+      template: |
+        You are in a programming contest using Reflexion methodology.
+
+        **Initial Contest Solution**:
+        Let me quickly implement my first approach for this contest problem:
+
+        ```python
+        # Initial contest solution
+        [First implementation]
+        ```
+
+        **Contest-Focused Reflection**:
+        In a contest setting, let me quickly reflect on potential issues:
+        - Is this algorithm fast enough for the largest test cases?
+        - Are there common contest edge cases I might have missed?
+        - Could there be integer overflow issues?
+        - Is my implementation too complex and error-prone for contest conditions?
+        - Is there a simpler, more reliable approach?
+
+        **Contest Issues Identified**:
+        [Quick identification of potential contest-specific problems]
+
+        **Improved Contest Strategy**:
+        For better contest performance, I should:
+        [Improved approach focusing on contest reliability and speed]
+
+        **Refined Contest Solution**:
+        ```python
+        # Improved contest solution
+        [Your refined implementation optimized for contest conditions]
+        ```
+
+        **Contest Verification**:
+        [Quick verification suitable for contest time pressure]
+
+        **Contest Learning**:
+        This reflection improved my contest approach by:
+        [Key insights for contest programming]
+
+  code_debugging:
+    base_info:
+      name: "Code Debugging"
+      description: "Finding and fixing bugs in existing code"
+      difficulty: "intermediate"
+      language: "multi"
+    
+    cot:
+      name: "Code Debugging with Chain of Thought"
+      template: |
+        You are debugging existing code using Chain of Thought reasoning.
+
+        **Step 1: Code Comprehension**
+        Let me first understand what this code is trying to accomplish...
+        [Detailed analysis of the code's intended functionality]
+
+        **Step 2: Code Flow Analysis**
+        I'll trace through the code execution step by step...
+        [Step-by-step analysis of code execution flow]
+
+        **Step 3: Bug Identification Process**
+        Now let me systematically look for potential issues...
+        [Systematic search for syntax errors, logic errors, edge cases]
+
+        **Step 4: Root Cause Analysis**
+        For each bug I found, let me understand why it occurs...
+        [Deep analysis of why each bug happens]
+
+        **Step 5: Impact Assessment**
+        These bugs could cause the following problems...
+        [Analysis of how bugs affect the code's behavior]
+
+        **Step 6: Fix Strategy Development**
+        For each bug, here's how I'll fix it...
+        [Detailed strategy for fixing each identified issue]
+
+        **Step 7: Implementation of Fixes**
+        ```[language]
+        [Corrected code with clear comments explaining each fix]
+        ```
+
+        **Step 8: Verification of Fixes**
+        Let me verify that my fixes resolve the issues without introducing new bugs...
+        [Testing and verification of the fixed code]
+
+    react:
+      name: "Code Debugging with ReAct"
+      template: |
+        You are debugging code using ReAct methodology.
+
+        **Thought 1**: I need to understand what this code is supposed to do before I can identify bugs.
+
+        **Action 1**: [ANALYZE_CODE_PURPOSE]
+        [Analyze the intended functionality of the code]
+
+        **Observation 1**: [What you learned about the code's purpose]
+
+        **Thought 2**: I should trace through the code execution to understand the flow.
+
+        **Action 2**: [TRACE_EXECUTION_FLOW]
+        [Step-by-step tracing of code execution]
+
+        **Observation 2**: [Insights about how the code executes]
+
+        **Thought 3**: Now I need to systematically look for different types of bugs.
+
+        **Action 3**: [SYSTEMATIC_BUG_SEARCH]
+        [Search for syntax errors, logic errors, edge case issues, etc.]
+
+        **Observation 3**: [Bugs and issues identified]
+
+        **Thought 4**: For each bug, I need to understand the root cause.
+
+        **Action 4**: [ANALYZE_ROOT_CAUSES]
+        [Detailed analysis of why each bug occurs]
+
+        **Observation 4**: [Understanding of bug causes]
+
+        **Thought 5**: I should implement targeted fixes for each identified issue.
+
+        **Action 5**: [IMPLEMENT_FIXES]
+        ```[language]
+        [Your corrected code with explanatory comments]
+        ```
+
+        **Observation 5**: [Assessment of fix quality and completeness]
+
+        **Thought 6**: I need to verify that my fixes work and don't introduce new issues.
+
+        **Action 6**: [VERIFY_FIXES]
+        [Testing and verification process]
+
+        **Observation 6**: [Final verification results]
+
+    reflexion:
+      name: "Code Debugging with Reflexion"
+      template: |
+        You are debugging code using Reflexion methodology.
+
+        **Initial Debugging Attempt**:
+        Let me first identify and fix the obvious issues I can see:
+
+        ```[language]
+        // Initial fixes
+        [Code with initial bug fixes]
+        ```
+
+        **Self-Reflection on Debugging Process**:
+        Let me reflect on my debugging approach:
+        - Did I identify all possible types of bugs (syntax, logic, edge cases)?
+        - Are there subtle bugs I might have missed?
+        - Did I consider how different inputs might affect the code?
+        - Are my fixes minimal and targeted, or did I over-engineer?
+        - Could my fixes introduce new bugs?
+        - Did I maintain the original code's intent while fixing bugs?
+
+        **Deeper Bug Analysis After Reflection**:
+        Upon reflection, I realize I should also check for:
+        [Additional bugs or issues identified through reflection]
+
+        **Improved Debugging Strategy**:
+        Based on my reflection, here's a more thorough approach:
+        [Enhanced debugging strategy]
+
+        **Comprehensive Bug Fixes**:
+        ```[language]
+        // Thoroughly debugged code after reflection
+        [Your improved corrected code]
+        ```
+
+        **Testing and Validation**:
+        [Comprehensive testing of the debugged code]
+
+        **Debugging Insights**:
+        Through this reflexive debugging process, I learned:
+        [Key insights about the bugs and debugging process]
+
+  code_optimization:
+    base_info:
+      name: "Code Optimization"
+      description: "Improving code performance and efficiency"
+      difficulty: "advanced"
+      language: "multi"
+    
+    cot:
+      name: "Code Optimization with Chain of Thought"
+      template: |
+        You are optimizing code for better performance using Chain of Thought reasoning.
+
+        **Step 1: Current Code Analysis**
+        Let me analyze the existing code to understand its current performance characteristics...
+        [Detailed analysis of current code structure and logic]
+
+        **Step 2: Performance Bottleneck Identification**
+        I'll systematically identify performance bottlenecks...
+        [Analysis of time complexity, space complexity, and performance bottlenecks]
+
+        **Step 3: Algorithmic Complexity Assessment**
+        Current complexity analysis:
+        - Time Complexity: O(?) because...
+        - Space Complexity: O(?) because...
+        [Detailed complexity analysis with reasoning]
+
+        **Step 4: Optimization Opportunity Analysis**
+        I can see several optimization opportunities...
+        [Identify specific areas for optimization: algorithms, data structures, caching, etc.]
+
+        **Step 5: Optimization Strategy Selection**
+        Based on the bottlenecks, I'll apply these optimization techniques...
+        [Choose specific optimization strategies with reasoning]
+
+        **Step 6: Trade-off Analysis**
+        Each optimization comes with trade-offs...
+        [Analysis of trade-offs between performance, readability, memory usage, etc.]
+
+        **Step 7: Optimized Implementation**
+        ```[language]
+        [Your optimized code with detailed comments explaining optimizations]
+        ```
+
+        **Step 8: Performance Improvement Analysis**
+        Optimization results:
+        - Before: O(?) time, O(?) space
+        - After: O(?) time, O(?) space
+        - Key improvements: [specific improvements achieved]
+
+        **Step 9: Verification and Testing**
+        Let me verify the optimized code maintains correctness...
+        [Testing and verification of optimized code]
+
+    react:
+      name: "Code Optimization with ReAct"
+      template: |
+        You are optimizing code performance using ReAct methodology.
+
+        **Thought 1**: I need to analyze the current code to understand its performance characteristics.
+
+        **Action 1**: [ANALYZE_CURRENT_PERFORMANCE]
+        [Detailed analysis of existing code performance]
+
+        **Observation 1**: [Current performance bottlenecks and complexity]
+
+        **Thought 2**: I should identify specific bottlenecks and inefficiencies.
+
+        **Action 2**: [IDENTIFY_BOTTLENECKS]
+        [Systematic identification of performance issues]
+
+        **Observation 2**: [Specific bottlenecks and their impact]
+
+        **Thought 3**: I need to explore different optimization strategies.
+
+        **Action 3**: [EXPLORE_OPTIMIZATION_STRATEGIES]
+        [Consider various optimization approaches]
+
+        **Observation 3**: [Viable optimization strategies and their trade-offs]
+
+        **Thought 4**: I should select and implement the most effective optimizations.
+
+        **Action 4**: [IMPLEMENT_OPTIMIZATIONS]
+        ```[language]
+        [Your optimized implementation]
+        ```
+
+        **Observation 4**: [Assessment of the optimized implementation]
+
+        **Thought 5**: I need to verify performance improvements and correctness.
+
+        **Action 5**: [BENCHMARK_AND_VERIFY]
+        [Performance benchmarking and correctness verification]
+
+        **Observation 5**: [Final performance results and verification]
+
+        **Thought 6**: I should document the optimizations and their impact.
+
+        **Action 6**: [DOCUMENT_OPTIMIZATIONS]
+        [Document optimizations and performance gains]
+
+        **Observation 6**: [Summary of optimization results and insights]
+
+    reflexion:
+      name: "Code Optimization with Reflexion"
+      template: |
+        You are optimizing code using Reflexion methodology.
+
+        **Initial Optimization Attempt**:
+        Let me first apply obvious optimizations to the code:
+
+        ```[language]
+        // Initial optimization attempt
+        [Code with basic optimizations]
+        ```
+
+        **Initial Performance Analysis**:
+        - Original: O(?) time, O(?) space
+        - Optimized: O(?) time, O(?) space
+
+        **Critical Reflection on Optimization**:
+        Let me reflect on my optimization approach:
+        - Did I identify all major performance bottlenecks?
+        - Are there more advanced optimization techniques I could apply?
+        - Did I consider algorithmic improvements vs. micro-optimizations?
+        - Are there trade-offs I didn't properly consider?
+        - Could I have achieved better performance with a different approach?
+        - Did I maintain code readability and maintainability?
+
+        **Advanced Optimization Insights**:
+        After reflection, I realize I could improve further by:
+        [Additional optimization opportunities identified through reflection]
+
+        **Enhanced Optimization Strategy**:
+        Based on my reflection, here's a more comprehensive optimization approach:
+        [Improved optimization strategy with advanced techniques]
+
+        **Highly Optimized Implementation**:
+        ```[language]
+        // Advanced optimized code after reflection
+        [Your highly optimized implementation]
+        ```
+
+        **Final Performance Analysis**:
+        - Original: O(?) time, O(?) space
+        - Final Optimized: O(?) time, O(?) space
+        - Performance improvement: [quantified improvements]
+
+        **Optimization Trade-offs and Decisions**:
+        [Analysis of trade-offs made and decisions reasoning]
+
+        **Optimization Learning Summary**:
+        Through this reflexive optimization process, I learned:
+        [Key insights about performance optimization and trade-offs]
+
+tools_config:
+  required_tools: ["execute_python", "analyze_complexity", "run_tests"]
+  optional_tools: ["benchmark_code", "format_code", "generate_tests"]
+  
+reasoning_types:
+  cot: "Chain of Thought - Step-by-step logical reasoning"
+  react: "ReAct - Reasoning and Acting with Thought-Action-Observation cycles"
+  reflexion: "Reflexion - Self-reflective improvement through critical analysis"
+
+languages:
+  supported: ["python", "java", "cpp", "javascript", "go", "rust"]
+  primary: "python"
+
+benchmarks:
+  easy: ["mbpp", "humaneval"]
+  medium: ["leetcode", "codex", "code_debugging"]
+  hard: ["apps", "code_contests", "code_optimization"]
+
+usage_examples:
+  # Access specific benchmark and reasoning type
+  # prompts[benchmark][reasoning_type] 
+  # e.g., prompts.humaneval.cot, prompts.leetcode.react, prompts.apps.reflexion
+  
+  # Access base information for a benchmark
+  # prompts[benchmark].base_info
+  # e.g., prompts.humaneval.base_info
